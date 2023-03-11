@@ -1,4 +1,6 @@
 defmodule Loupe.Language do
+  alias Loupe.Language.GetAst
+
   @sample ~s(
     get all Event where all
   )
@@ -13,7 +15,11 @@ defmodule Loupe.Language do
   def parse(charlist) do
     with {:ok, tokens, _} <- :lexer.string(charlist),
          {:ok, ast} <- :parser.parse(tokens) do
-      ast
+      new_ast(ast)
     end
+  end
+
+  defp new_ast({:get, quantifier, schema, predicates}) do
+    GetAst.new(schema, quantifier, predicates)
   end
 end

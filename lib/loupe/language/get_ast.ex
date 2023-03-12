@@ -3,6 +3,8 @@ defmodule Loupe.Language.GetAst do
 
   alias Loupe.Language.GetAst
 
+  import Kernel, except: [to_string: 1]
+
   @type range :: {integer(), integer()}
 
   @type literal ::
@@ -27,17 +29,19 @@ defmodule Loupe.Language.GetAst do
   @operands ~w(= > < >= <= like in)a
   @boolean_operators ~w(or and)a
   @literals ~w(string int float)a
+  @reserved_keywords ~w(all in)a
 
   defguard is_operand(operand) when operand in @operands
   defguard is_boolean_operator(boolean_operator) when boolean_operator in @boolean_operators
   defguard is_literal(literal) when literal in @literals
+  defguard is_reserved_keyword(keyword) when keyword in @reserved_keywords
 
   @spec new(binding(), quantifier(), predicate()) :: t()
   def new(binding, quantifier, predicates) do
     %GetAst{
       quantifier: quantifier,
       predicates: walk_predicates(predicates),
-      schema: to_string(binding)
+      schema: Kernel.to_string(binding)
     }
   end
 
@@ -59,12 +63,45 @@ defmodule Loupe.Language.GetAst do
   end
 
   defp walk_predicates({:string, value}) do
-    {:string, to_string(value)}
+    {:string, Kernel.to_string(value)}
   end
 
   defp walk_predicates({literal, value}) when is_literal(literal) do
     {literal, value}
   end
 
-  defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &to_string/1)}
+  defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &Kernel.to_string/1)}
+
+  def to_string(%GetAst{quantifier: quantifier, schema: schema, predicates: predicates}) do
+    "get #{part_to_string(quantifier)} #{schema} where #{part_to_string(predicates)}"
+  end
+
+  defp part_to_string({:range, {left, right}}), do: Enum.join([left, right], "..")
+  defp part_to_string({:int, int}), do: Kernel.to_string(int)
+  defp part_to_string({:string, string}), do: wrap(string, "\"")
+  defp part_to_string({:float, float}), do: Kernel.to_string(float)
+
+  defp part_to_string({:list, items}) do
+    items
+    |> Enum.map_join(&part_to_string/1, ", ")
+    |> wrap("[", "]")
+  end
+
+  defp part_to_string({:binding, bindings}) do
+    Enum.join(bindings, ".")
+  end
+
+  defp part_to_string({:or, left, right}),
+    do: "(#{part_to_string(left)} or #{part_to_string(right)})"
+
+  defp part_to_string({:and, left, right}),
+    do: "(#{part_to_string(left)} and #{part_to_string(right)})"
+
+  defp part_to_string({operand, left, right}),
+    do: "#{part_to_string(left)} #{part_to_string(operand)} #{part_to_string(right)}"
+
+  defp part_to_string(keyword) when is_operand(keyword) or is_reserved_keyword(keyword),
+    do: Kernel.to_string(keyword)
+
+  defp wrap(word, left, right \\ "\""), do: "#{left}#{word}#{right}"
 end

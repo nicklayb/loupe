@@ -24,6 +24,8 @@ defmodule Loupe.MixProject do
 
   defp deps do
     [
+      {:ecto, "~> 3.9.4", optional: true},
+      {:ecto_sql, "~> 3.9.2", optional: true}
     ]
   end
 end

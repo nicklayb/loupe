@@ -10,6 +10,10 @@ if Code.ensure_loaded?(Ecto) do
         |> limit_query(ast)
         |> filter_query(ast, implementation, context)
       end
+end
+
+    defp filter_query(query, %GetAst{}, implementation, context) do
+      
     end
 
     defp limit_query(query, %GetAst{quantifier: :all}) do

@@ -117,9 +117,8 @@ defmodule Loupe.LanguageTest do
                 predicates:
                   {:or,
                    {:and, {:=, {:binding, ["age"]}, {:int, 18}},
-                     {:=, {:binding, ["name"]}, {:string, "Bob"}}},
-                    {:>, {:binding, ["age"]}, {:int, 50}}
-                  }
+                    {:=, {:binding, ["name"]}, {:string, "Bob"}}},
+                   {:>, {:binding, ["age"]}, {:int, 50}}}
               }} = Language.compile(@case)
     end
   end

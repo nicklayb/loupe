@@ -13,11 +13,12 @@ True = true
 False = false
 OpenParen = \(
 CloseParen = \)
+OpenBracket = \[
+CloseBracket = \]
 Arrow = \=>
 String = "([^"\\]*(\\.[^"\\]*)*)"
-Range = {Digit}..{Digit}
 Quantifier = [kmKM]
-Comparator = and|or
+BoolOp = and|or
 Operand = >|<|>=|<=|=|like
 ListOperand = in
 Not = not
@@ -25,37 +26,43 @@ Dot = \.
 All = all
 Get = get
 Where = where
+As = as
 
-Identifier = [A-Za-z][A-Za-z0-9]+
-IntegerPart = {NegativeSign}?0|{NegativeSign}?{NonZeroDigit}{Digit}*
-IntegerPart = {NonZeroDigit}?{Digit}*
+Identifier  = [A-Za-z][A-Za-z0-9]+
+PositiveInt = {NonZeroDigit}?{Digit}*
+IntegerPart = {NegativeSign}?{PositiveInt}
 IntValue    = {IntegerPart}
 IntQuant    = {IntegerPart}{Quantifier}
 FloatValue  = {IntegerPart}{FractionalPart}|{IntegerPart}{ExponentPart}|{IntegerPart}{FractionalPart}{ExponentPart}
-DoubleDot   = {Dot}{Dot}.
+DoubleDot   = {Dot}{Dot}
+Range       = {PositiveInt}{DoubleDot}{PositiveInt}
 
 Rules.
 
-{Whitespace}  : skip_token.
-{Terminator}  : skip_token.
-{Comma}       : {token, {comma,             TokenLine, list_to_atom(TokenChars)}}.
-{Dot}         : {token, {dot,               TokenLine, list_to_atom(TokenChars)}}.
-{All}         : {token, {all,               TokenLine, list_to_atom(TokenChars)}}.
-{Get}         : {token, {get,               TokenLine, list_to_atom(TokenChars)}}.
-{Where}       : {token, {where,             TokenLine, list_to_atom(TokenChars)}}.
-{PositiveInt} : {token, {positive_integer,  TokenLine, list_to_integer(TokenChars)}}.
-{IntValue}    : {token, {int,               TokenLine, list_to_integer(TokenChars)}}.
-{IntQuant}    : {token, {int,               TokenLine, quantify_integer(TokenChars)}}.
-{FloatValue}  : {token, {float,             TokenLine, list_to_float(TokenChars)}}.
-{String}      : {token, {string,            TokenLine, string:trim(TokenChars, both, "\"")}}.
-{Comparator}  : {token, {comparator,        TokenLine, list_to_atom(TokenChars)}}.
-{Operand}     : {token, {operand,           TokenLine, list_to_atom(TokenChars)}}.
-{ListOperand} : {token, {list_operand,      TokenLine, list_to_atom(TokenChars)}}.
-{Not}         : {token, {negate,            TokenLine, list_to_atom(TokenChars)}}.
-{Identifier}  : {token, {identifier,        TokenLine, list_to_atom(TokenChars)}}.
-{OpenParen}   : {token, {open_paren,        TokenLine, list_to_atom(TokenChars)}}.
-{CloseParen}  : {token, {close_paren,       TokenLine, list_to_atom(TokenChars)}}.
-
+{Whitespace}    : skip_token.
+{Terminator}    : skip_token.
+{Comma}         : {token, {comma,             TokenLine, list_to_atom(TokenChars)}}.
+{Dot}           : {token, {dot,               TokenLine, list_to_atom(TokenChars)}}.
+{DoubleDot}     : {token, {double_dot,        TokenLine, list_to_atom(TokenChars)}}.
+{All}           : {token, {all,               TokenLine, list_to_atom(TokenChars)}}.
+{As}            : {token, {as,                TokenLine, list_to_atom(TokenChars)}}.
+{Get}           : {token, {get,               TokenLine, list_to_atom(TokenChars)}}.
+{Where}         : {token, {where,             TokenLine, list_to_atom(TokenChars)}}.
+{PositiveInt}   : {token, {positive_integer,  TokenLine, list_to_integer(TokenChars)}}.
+{IntValue}      : {token, {integer,           TokenLine, list_to_integer(TokenChars)}}.
+{IntQuant}      : {token, {integer,           TokenLine, quantify_integer(TokenChars)}}.
+{FloatValue}    : {token, {float,             TokenLine, list_to_float(TokenChars)}}.
+{String}        : {token, {string,            TokenLine, string:trim(TokenChars, both, "\"")}}.
+{Range}         : {token, {range,             TokenLine, extract_range(TokenChars)}}.
+{BoolOp}        : {token, {boolean_operator,  TokenLine, list_to_atom(TokenChars)}}.
+{Operand}       : {token, {operand,           TokenLine, list_to_atom(TokenChars)}}.
+{ListOperand}   : {token, {list_operand,      TokenLine, list_to_atom(TokenChars)}}.
+{Not}           : {token, {negate,            TokenLine, list_to_atom(TokenChars)}}.
+{Identifier}    : {token, {identifier,        TokenLine, TokenChars}}.
+{OpenParen}     : {token, {open_paren,        TokenLine, list_to_atom(TokenChars)}}.
+{CloseParen}    : {token, {close_paren,       TokenLine, list_to_atom(TokenChars)}}.
+{OpenBracket}   : {token, {open_bracket,      TokenLine, list_to_atom(TokenChars)}}.
+{CloseBracket}  : {token, {close_bracket,     TokenLine, list_to_atom(TokenChars)}}.
 
 Erlang code.
 
@@ -69,4 +76,10 @@ quantify_integer(Chars) ->
     "M" ->
       Value * 1000000
   end.
+
+extract_range(Chars) ->
+    [Minimum, Maximum] = string:split(Chars, ".."),
+    {MinimumInt, _} = string:to_integer(Minimum),
+    {MaximumInt, _} = string:to_integer(Maximum),
+    {MinimumInt, MaximumInt}.
 

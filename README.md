@@ -1,6 +1,6 @@
 # Loupe
 
-**TODO: Add description**
+Loupe is query language for Ecto schema inspection in a safe and configurable manner.
 
 ## Installation
 
@@ -18,4 +18,10 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/loupe>.
+
+## Syntax
+
+```
+get all User where email = "user@email.com"
+```
 

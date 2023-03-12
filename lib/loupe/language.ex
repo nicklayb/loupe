@@ -1,21 +1,25 @@
 defmodule Loupe.Language do
   alias Loupe.Language.GetAst
 
-  @sample ~s(
-    get all Event where all
-  )
-  def parse, do: parse(@sample)
+  alias Loupe.Errors.ParserError
+  alias Loupe.Errors.LexerError
 
-  def parse(string) when is_binary(string) do
+  @type compile_error :: ParserError.t() | LexerError.t()
+
+  @spec compile(String.t() | charlist()) :: {:ok, %GetAst{}} | compile_error()
+  def compile(string) when is_binary(string) do
     string
     |> String.to_charlist()
-    |> parse()
+    |> compile()
   end
 
-  def parse(charlist) do
+  def compile(charlist) do
     with {:ok, tokens, _} <- :lexer.string(charlist),
          {:ok, ast} <- :parser.parse(tokens) do
-      new_ast(ast)
+      {:ok, new_ast(ast)}
+    else
+      {:error, {line, :parser, messages}} -> %ParserError{line: line, message: messages}
+      {:error, {line, :lexer, messages}} -> %LexerError{line: line, message: messages}
     end
   end
 

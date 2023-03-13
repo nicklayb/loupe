@@ -67,4 +67,21 @@ defmodule Loupe.Language.GetAst do
   end
 
   defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &to_string/1)}
+
+  @doc "Extracts bindings of an AST"
+  @spec bindings(t()) :: [[binary()]]
+  def bindings(%GetAst{predicates: predicates}) do
+    extract_bindings(predicates, [])
+  end
+
+  defp extract_bindings({operand, {:binding, binding}, _}, accumulator) when is_operand(operand) do
+    [binding | accumulator]
+  end
+
+  defp extract_bindings({boolean_operator, left, right}, accumulator)
+       when is_boolean_operator(boolean_operator) do
+    Enum.reduce([left, right], accumulator, &extract_bindings(&1, &2))
+       end
+
+       defp extract_bindings(_, accumulator), do: accumulator
 end

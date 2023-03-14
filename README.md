@@ -1,5 +1,8 @@
 # Loupe
 
+[![Coverage Status](https://coveralls.io/repos/github/nicklayb/loupe/badge.svg?branch=main)](https://coveralls.io/github/nicklayb/loupe?branch=main)
+[![Elixir CI](https://github.com/nicklayb/loupe/actions/workflows/elixir.yml/badge.svg)](https://github.com/nicklayb/loupe/actions/workflows/elixir.yml)
+
 Loupe is query language for Ecto schema inspection in a safe and configurable manner.
 
 ## Installation
@@ -93,7 +96,8 @@ end
 Once you have this definition, you can try some queries
 
 ```elixir
-{:ok, ecto_query} = Loupe.Ecto.build_query(~s"get all User where age > 18", MyApp.Loupe.Definition, %{role: "admin"})
+{:ok, ast} = Loupe.Language.compile(~s|get all User where age > 18|)
+{:ok, ecto_query} = Loupe.Ecto.build_query(ast, MyApp.Loupe.Definition, %{role: "admin"})
 Repo.all(ecto_query)
 ```
 

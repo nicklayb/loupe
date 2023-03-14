@@ -25,6 +25,7 @@ defmodule Loupe.EctoTest do
                )
                """)
     end
+
     test "builds query joining binding and applying predicates" do
       assert [
                %User{email: "user@email.com"}

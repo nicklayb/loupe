@@ -38,7 +38,7 @@ defmodule Loupe.MixProject do
       links: %{
         "GitHub" => @github
       },
-            maintainers: ["Nicolas Boisvert"]
+      maintainers: ["Nicolas Boisvert"]
     ]
   end
 

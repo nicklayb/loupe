@@ -6,11 +6,28 @@ if Code.ensure_loaded?(Ecto) do
     """
     import Ecto.Query
     alias Loupe.Ecto.Context
+    alias Loupe.Language
     alias Loupe.Language.GetAst
 
     @root_binding :root
 
-    def build_query(%GetAst{} = ast, implementation, context_assigns \\ %{}) do
+    @type ast :: GetAst.t()
+
+    @doc """
+    Builds an Ecto query from either an AST or a string. It requires an implementation
+    of the Loupe.Ecto.Definition behaviour and supports assigns as a third parameter.
+    """
+    @spec build_query(ast() | binary(), Context.implementation(), map()) ::
+            {:ok, Ecto.Query.t()} | {:error, atom()}
+    def build_query(string, implementation, context_assigns \\ %{})
+
+    def build_query(string, implementation, context_assigns) when is_binary(string) do
+      with {:ok, %GetAst{} = ast} <- Language.compile(string) do
+        build_query(ast, implementation, context_assigns)
+      end
+    end
+
+    def build_query(%GetAst{} = ast, implementation, context_assigns) do
       context = Context.new(implementation, context_assigns)
 
       with {:ok, context} <- put_root_schema(ast, context),

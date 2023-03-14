@@ -13,6 +13,18 @@ defmodule Loupe.EctoTest do
   setup [:setup_entities]
 
   describe "build_query/1" do
+    test "builds query joining binding and applying predicates from string" do
+      assert [
+               %User{email: "user@email.com"}
+             ] =
+               run_query("""
+               get all User 
+               where (
+                 posts.comments.text like "something" 
+                 and role.slug = "admin"
+               )
+               """)
+    end
     test "builds query joining binding and applying predicates" do
       assert [
                %User{email: "user@email.com"}

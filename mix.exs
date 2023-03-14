@@ -19,6 +19,10 @@ defmodule Loupe.MixProject do
         "coveralls.post": :test,
         "coveralls.html": :test
       ],
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ],
       name: "Loupe",
       description: "User friendly customizable query syntax",
       source_url: @github,
@@ -33,7 +37,8 @@ defmodule Loupe.MixProject do
       licenses: ["MIT"],
       links: %{
         "GitHub" => @github
-      }
+      },
+            maintainers: ["Nicolas Boisvert"]
     ]
   end
 

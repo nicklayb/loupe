@@ -26,3 +26,5 @@ loupe-*.tar
 /tmp/
 
 .elixir_ls
+
+database.db*

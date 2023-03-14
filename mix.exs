@@ -8,7 +8,8 @@ defmodule Loupe.MixProject do
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -25,7 +26,15 @@ defmodule Loupe.MixProject do
   defp deps do
     [
       {:ecto, "~> 3.9.4", optional: true},
-      {:ecto_sql, "~> 3.9.2", optional: true}
+      {:ecto_sql, "~> 3.9.2", optional: true},
+      {:ecto_sqlite3, "~> 0.9.1", only: [:dev, :test]},
+      {:credo, "~> 1.6.7", only: [:dev, :test]}
+    ]
+  end
+
+  defp aliases do
+    [
+      test: ["ecto.create --quiet -r Loupe.Test.Ecto.Repo", "ecto.migrate", "test"]
     ]
   end
 end

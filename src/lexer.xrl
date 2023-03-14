@@ -19,16 +19,18 @@ Arrow = \=>
 String = "([^"\\]*(\\.[^"\\]*)*)"
 Quantifier = [kmKM]
 BoolOp = and|or
-Operand = >|<|>=|<=|=|like
+Operand = !=|>|<|>=|<=|=
 ListOperand = in
+LikeOperand = like
 Not = not
 Dot = \.
 All = all
 Get = get
 Where = where
 As = as
+Empty = :empty
 
-Identifier  = [A-Za-z][A-Za-z0-9]+
+Identifier  = [A-Za-z][A-Za-z0-9]*
 PositiveInt = {NonZeroDigit}?{Digit}*
 IntegerPart = {NegativeSign}?{PositiveInt}
 IntValue    = {IntegerPart}
@@ -48,6 +50,7 @@ Rules.
 {As}            : {token, {as,                TokenLine, list_to_atom(TokenChars)}}.
 {Get}           : {token, {get,               TokenLine, list_to_atom(TokenChars)}}.
 {Where}         : {token, {where,             TokenLine, list_to_atom(TokenChars)}}.
+{Empty}         : {token, {empty,             TokenLine, list_to_atom(TokenChars)}}.
 {PositiveInt}   : {token, {positive_integer,  TokenLine, list_to_integer(TokenChars)}}.
 {IntValue}      : {token, {integer,           TokenLine, list_to_integer(TokenChars)}}.
 {IntQuant}      : {token, {integer,           TokenLine, quantify_integer(TokenChars)}}.
@@ -57,6 +60,7 @@ Rules.
 {BoolOp}        : {token, {boolean_operator,  TokenLine, list_to_atom(TokenChars)}}.
 {Operand}       : {token, {operand,           TokenLine, list_to_atom(TokenChars)}}.
 {ListOperand}   : {token, {list_operand,      TokenLine, list_to_atom(TokenChars)}}.
+{LikeOperand}   : {token, {like,              TokenLine, list_to_atom(TokenChars)}}.
 {Not}           : {token, {negate,            TokenLine, list_to_atom(TokenChars)}}.
 {Identifier}    : {token, {identifier,        TokenLine, TokenChars}}.
 {OpenParen}     : {token, {open_paren,        TokenLine, list_to_atom(TokenChars)}}.

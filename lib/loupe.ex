@@ -1,2 +1,0 @@
-defmodule Loupe do
-end

@@ -1,5 +1,33 @@
 if Code.ensure_loaded?(Ecto) do
   defmodule Loupe.Ecto.Context do
+    @moduledoc """
+    The context is the structure that goes through the query building process. It
+    includes the user assigns which are passed down below in the ecto definition,
+    but also includes a couple fields to make sure that query info are validated
+    beforehand.
+
+    ## Ecto schema validations
+
+    Some things are validated before executing the query to avoid crashes during
+    the query execution. These validations includs:
+    - Validate that the fetched schema exists and a valid schema.
+    - Validate that the queried field are valid on the attached schema and allowed.
+
+    It also extract the query bindings which are the queries associations and
+    validates them. This is meant to allow someone to use `posts.comments.user.name`
+    in a query and directly join the posts's comments and comments's user to filter
+    its name.
+
+    ## Binding naming
+
+    Ecto requires named bindings to be atom (which makes total sense). To avoid
+    generating atoms at runtimes in the system, any non-reserverd keyword is cast as
+    string when generating the AST.
+
+    When building the Ecto query, the join statements uses bindings from a predefined
+    set that you can find a the bottom of this file under the `@binding_keys` module
+    attribute.
+    """
     defstruct [:assigns, :implementation, :root_schema, bindings: %{}]
 
     alias Loupe.Ecto.Context
@@ -8,7 +36,8 @@ if Code.ensure_loaded?(Ecto) do
     @type schemas :: %{binary() => schema()}
     @type assigns :: Loupe.Ecto.Context.assigns()
     @type implementation :: module()
-    @type bindings :: %{[binary()] => atom()}
+    @type binding_path :: [atom()]
+    @type bindings :: %{binding_path() => atom()}
 
     @type t :: %Context{
             assigns: assigns(),
@@ -17,6 +46,12 @@ if Code.ensure_loaded?(Ecto) do
             bindings: bindings()
           }
 
+    @doc """
+    Instanciates a context with an implementation and some assigns. The assigns
+    will be passed down to the implementation during to query building process to
+    alter the definition dynamically.
+    """
+    @spec new(implementation(), assigns()) :: t()
     def new(implementation, assigns) do
       %Context{implementation: implementation, assigns: assigns}
     end
@@ -54,6 +89,14 @@ if Code.ensure_loaded?(Ecto) do
       end
     end
 
+    @doc "Sorts binding in order to be join in order"
+    @spec sorted_bindings(t()) :: [{binding_path(), atom()}]
+    def sorted_bindings(%Context{bindings: bindings}) do
+      bindings
+      |> Enum.to_list()
+      |> Enum.sort_by(fn {binding_path, _} -> length(binding_path) end)
+    end
+
     @doc """
     Puts bindings in the context validation that bindings are either
     valid fields or associations.
@@ -71,12 +114,29 @@ if Code.ensure_loaded?(Ecto) do
       end)
     end
 
-    defp put_binding(%Context{bindings: bindings} = context, [_ | _] = binding) do
-      bindings = Map.put(bindings, Enum.reverse(binding), next_binding(context))
-      %Context{context | bindings: bindings}
+    defp put_binding(%Context{} = context, [_ | _] = binding) do
+      unzipped_bindings =
+        binding
+        |> Enum.reverse()
+        |> unzip_binding()
+
+      Enum.reduce(unzipped_bindings, context, fn unzipped_binding,
+                                                 %Context{bindings: bindings} = accumulator ->
+        bindings = Map.put(bindings, unzipped_binding, next_binding(accumulator))
+        %Context{accumulator | bindings: bindings}
+      end)
     end
 
     defp put_binding(%Context{} = context, _), do: context
+
+    defp unzip_binding(binding), do: unzip_binding(binding, {[], []})
+
+    defp unzip_binding([left | rest], {current, all}) do
+      current_binding = current ++ [left]
+      unzip_binding(rest, {current_binding, [current_binding | all]})
+    end
+
+    defp unzip_binding([], {_, all}), do: all
 
     defp validate_binding(%Context{} = context, schema, [binding], accumulator) do
       atom_binding = String.to_existing_atom(binding)

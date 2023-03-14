@@ -3,8 +3,6 @@ defmodule Loupe.Ecto.ContextTest do
 
   alias Loupe.Ecto.Context
   alias Loupe.Test.Ecto.User
-  alias Loupe.Test.Ecto.Post
-  alias Loupe.Test.Ecto.Role
 
   @implementation Loupe.Test.Ecto.Definition
 
@@ -63,15 +61,13 @@ defmodule Loupe.Ecto.ContextTest do
                 }
               }} = Context.put_bindings(context, [["posts", "title"]])
 
-      {:ok, context} = Context.put_root_schema(context, "Post")
-
       assert {:ok,
               %Context{
                 bindings: %{
-                  [:user, :role] => :a0,
-                  [:user] => :a1
+                  [:posts, :comments] => :a0,
+                  [:posts] => :a1
                 }
-              }} = Context.put_bindings(context, [["user", "role", "slug"], ["user", "email"]])
+              }} = Context.put_bindings(context, [["posts", "comments", "text"]])
     end
 
     @tag assigns: %{role: "user"}
@@ -83,33 +79,17 @@ defmodule Loupe.Ecto.ContextTest do
     end
   end
 
-  describe "schemas/1" do
-    setup [:create_context]
+  describe "sorted_bidings/1" do
+    setup [
+      :create_context,
+      :with_root_schema
+    ]
 
-    test "lists implementation's schemas", %{context: context} do
+    test "gets sorted bindings by path length", %{context: context} do
+      assert {:ok, %Context{} = context} =
+               Context.put_bindings(context, [["posts", "comments", "text"]])
+
+      assert [{[:posts], :a1}, {[:posts, :comments], :a0}] = Context.sorted_bindings(context)
     end
-  end
-
-  defp create_context(test_context) do
-    assigns = Map.get(test_context, :assigns, %{role: "admin"})
-
-    [context: Context.new(@implementation, assigns)]
-  end
-
-  defp with_root_schema(%{context: context} = test_context) do
-    root_schema_key = Map.get(test_context, :root_schema, "User")
-    %{^root_schema_key => root_schema} = Context.schemas(context)
-    [_ | _] = root_schema.__schema__(:fields)
-    {:ok, context} = Context.put_root_schema(context, root_schema_key)
-    [context: context]
-  end
-
-  defp load_schemas(_) do
-    Enum.each([User, Role, Post], fn schema ->
-      schema.__schema__(:fields)
-      schema.__schema__(:associations)
-    end)
-
-    :ok
   end
 end

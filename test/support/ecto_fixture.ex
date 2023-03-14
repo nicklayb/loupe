@@ -1,60 +1,85 @@
-defmodule Loupe.Test.Ecto.Post do
-  use Ecto.Schema
+defmodule Loupe.Test.Ecto do
+  @moduledoc "Mock schemas and Ecto modules for tests"
 
-  schema("posts") do
-    field(:title, :string)
-    field(:body, :string)
+  defmodule Repo do
+    @moduledoc "Mocked repo"
 
-    belongs_to(:user, Loupe.Test.Ecto.User)
+    use Ecto.Repo,
+      otp_app: :loupe,
+      adapter: Ecto.Adapters.SQLite3
   end
-end
 
-defmodule Loupe.Test.Ecto.Role do
-  use Ecto.Schema
+  defmodule Comment do
+    @moduledoc "Comment schema"
+    use Ecto.Schema
 
-  schema("roles") do
-    field(:slug, :string)
-
-    has_many(:users, Loupe.Test.Ecto.User)
+    schema("comments") do
+      field(:text, :string)
+      field(:post_id, :integer)
+    end
   end
-end
 
-defmodule Loupe.Test.Ecto.User do
-  use Ecto.Schema
+  defmodule Post do
+    @moduledoc "Post schema"
+    use Ecto.Schema
 
-  schema("users") do
-    field(:email, :string)
-    field(:age, :integer)
+    schema("posts") do
+      field(:title, :string)
+      field(:body, :string)
+      field(:user_id, :integer)
 
-    has_many(:posts, Loupe.Test.Ecto.Post)
-
-    belongs_to(:role, Loupe.Test.Ecto.Role)
+      has_many(:comments, Comment)
+    end
   end
-end
 
-defmodule Loupe.Test.Ecto.Definition do
-  @behaviour Loupe.Ecto.Definition
+  defmodule Role do
+    @moduledoc "Post schema"
+    use Ecto.Schema
 
-  alias Loupe.Test.Ecto.Post
-  alias Loupe.Test.Ecto.Role
-  alias Loupe.Test.Ecto.User
+    schema("roles") do
+      field(:slug, :string)
+    end
+  end
 
-  @schemas %{
-    "Post" => Post,
-    "User" => User,
-    "Role" => Role
-  }
+  defmodule User do
+    @moduledoc "Post schema"
+    use Ecto.Schema
 
-  @impl Loupe.Ecto.Definition
-  def schemas(%{role: "admin"}), do: @schemas
-  def schemas(_), do: Map.take(@schemas, ["Post", "User"])
+    schema("users") do
+      field(:name, :string)
+      field(:email, :string)
+      field(:age, :integer)
+      field(:active, :boolean)
 
-  @impl Loupe.Ecto.Definition
-  def schema_fields(_, %{role: "admin"}), do: :all
-  def schema_fields(Post, _), do: {:only, [:title, :body]}
-  def schema_fields(User, _), do: {:only, [:email, :posts]}
-  def schema_fields(_, _), do: :all
+      has_many(:posts, Post)
 
-  @impl Loupe.Ecto.Definition
-  def scope_schema(schema, _), do: schema
+      belongs_to(:role, Role)
+    end
+  end
+
+  defmodule Definition do
+    @moduledoc """
+    Example Ecto definition for the modules defined above.
+    """
+    @behaviour Loupe.Ecto.Definition
+
+    @schemas %{
+      "Post" => Post,
+      "User" => User,
+      "Role" => Role
+    }
+
+    @impl Loupe.Ecto.Definition
+    def schemas(%{role: "admin"}), do: @schemas
+    def schemas(_), do: Map.take(@schemas, ["Post", "User"])
+
+    @impl Loupe.Ecto.Definition
+    def schema_fields(_, %{role: "admin"}), do: :all
+    def schema_fields(Post, _), do: {:only, [:title, :body]}
+    def schema_fields(User, _), do: {:only, [:email, :posts]}
+    def schema_fields(_, _), do: :all
+
+    @impl Loupe.Ecto.Definition
+    def scope_schema(schema, _), do: schema
+  end
 end

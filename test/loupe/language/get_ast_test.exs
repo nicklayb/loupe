@@ -17,11 +17,12 @@ defmodule Loupe.Language.GetAstTest do
     @case ~s|get all User where (name = "John Doe") and (role.slug = "admin" or role.permissions.slug in ["read", "right"])|
     test "extracts bindings and composed bindings from predicates" do
       assert {:ok, %GetAst{} = ast} = Language.compile(@case)
-        assert [
-          ["role", "permissions", "slug"],
-          ["role", "slug"],
-          ["name"]
-        ] == GetAst.bindings(ast)
+
+      assert [
+               ["role", "permissions", "slug"],
+               ["role", "slug"],
+               ["name"]
+             ] == GetAst.bindings(ast)
     end
   end
 end

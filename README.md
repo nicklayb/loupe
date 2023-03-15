@@ -1,5 +1,8 @@
 # Loupe
 
+[![Coverage Status](https://coveralls.io/repos/github/nicklayb/loupe/badge.svg?branch=main)](https://coveralls.io/github/nicklayb/loupe?branch=main)
+[![Elixir CI](https://github.com/nicklayb/loupe/actions/workflows/elixir.yml/badge.svg)](https://github.com/nicklayb/loupe/actions/workflows/elixir.yml)
+
 Loupe is query language for Ecto schema inspection in a safe and configurable manner.
 
 ## Installation

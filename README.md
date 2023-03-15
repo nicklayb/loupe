@@ -96,7 +96,8 @@ end
 Once you have this definition, you can try some queries
 
 ```elixir
-{:ok, ecto_query} = Loupe.Ecto.build_query(~s"get all User where age > 18", MyApp.Loupe.Definition, %{role: "admin"})
+{:ok, ast} = Loupe.Language.compile(~s|get all User where age > 18|)
+{:ok, ecto_query} = Loupe.Ecto.build_query(ast, MyApp.Loupe.Definition, %{role: "admin"})
 Repo.all(ecto_query)
 ```
 

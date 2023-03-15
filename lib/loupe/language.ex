@@ -1,12 +1,16 @@
 defmodule Loupe.Language do
+  @moduledoc """
+  Loupe's compiler entrypoint.
+  """
   alias Loupe.Language.GetAst
 
-  alias Loupe.Errors.ParserError
   alias Loupe.Errors.LexerError
+  alias Loupe.Errors.ParserError
 
   @type compile_error :: ParserError.t() | LexerError.t()
 
-  @spec compile(String.t() | charlist()) :: {:ok, %GetAst{}} | compile_error()
+  @doc "Compiles a query to AST"
+  @spec compile(String.t() | charlist()) :: {:ok, GetAst.t()} | compile_error()
   def compile(string) when is_binary(string) do
     string
     |> String.to_charlist()

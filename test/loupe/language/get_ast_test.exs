@@ -13,11 +13,16 @@ defmodule Loupe.Language.GetAstTest do
     end
   end
 
-  describe "to_string/1" do
-    test "stringifies a basic query" do
-      query = ~s|get all User where role.slug = "admin"|
-      assert {:ok, ast} = Language.compile(query)
-      assert query == GetAst.to_string(ast)
+  describe "bindings/1" do
+    @case ~s|get all User where (name = "John Doe") and (role.slug = "admin" or role.permissions.slug in ["read", "right"])|
+    test "extracts bindings and composed bindings from predicates" do
+      assert {:ok, %GetAst{} = ast} = Language.compile(@case)
+
+      assert [
+               ["role", "permissions", "slug"],
+               ["role", "slug"],
+               ["name"]
+             ] == GetAst.bindings(ast)
     end
   end
 end

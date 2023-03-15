@@ -50,6 +50,12 @@ defmodule Loupe.LanguageTest do
                Language.compile(@case)
     end
 
+    @case ~s|get User where age != 18|
+    test "supports != operator" do
+      assert {:ok, %GetAst{predicates: {:!=, {:binding, ["age"]}, {:int, 18}}}} =
+               Language.compile(@case)
+    end
+
     @case ~s|get User where age = 18|
     test "supports = operator" do
       assert {:ok, %GetAst{predicates: {:=, {:binding, ["age"]}, {:int, 18}}}} =
@@ -68,9 +74,39 @@ defmodule Loupe.LanguageTest do
                Language.compile(@case)
     end
 
+    @case ~s|get User where age :empty|
+    test "supports :empty keyword" do
+      assert {:ok, %GetAst{predicates: {:=, {:binding, ["age"]}, :empty}}} =
+               Language.compile(@case)
+    end
+
+    @case ~s|get User where age|
+    test "supports thruty expression" do
+      assert {:ok, %GetAst{predicates: {:=, {:binding, ["age"]}, true}}} = Language.compile(@case)
+    end
+
+    @case ~s|get User where not age|
+    test "supports falsy expression" do
+      assert {:ok, %GetAst{predicates: {:=, {:binding, ["age"]}, false}}} =
+               Language.compile(@case)
+    end
+
+    @case ~s|get User where age not :empty|
+    test "supports not :empty keyword" do
+      assert {:ok, %GetAst{predicates: {:not, {:=, {:binding, ["age"]}, :empty}}}} =
+               Language.compile(@case)
+    end
+
     @case ~s|get User where email like "something"|
     test "supports like operator" do
       assert {:ok, %GetAst{predicates: {:like, {:binding, ["email"]}, {:string, "something"}}}} =
+               Language.compile(@case)
+    end
+
+    @case ~s|get User where email not like "something"|
+    test "supports not like operator" do
+      assert {:ok,
+              %GetAst{predicates: {:not, {:like, {:binding, ["email"]}, {:string, "something"}}}}} =
                Language.compile(@case)
     end
 
@@ -78,6 +114,17 @@ defmodule Loupe.LanguageTest do
     test "supports composed bindings" do
       assert {:ok, %GetAst{predicates: {:=, {:binding, ["role", "slug"]}, {:string, "admin"}}}} =
                Language.compile(@case)
+    end
+
+    @case ~s|get User where role.slug not in ["admin", "user"]|
+    test "supports not in list operand" do
+      assert {:ok,
+              %GetAst{
+                predicates:
+                  {:not,
+                   {:in, {:binding, ["role", "slug"]},
+                    {:list, [{:string, "admin"}, {:string, "user"}]}}}
+              }} = Language.compile(@case)
     end
 
     @case ~s|get User where role.slug in ["admin", "user"]|
@@ -101,7 +148,7 @@ defmodule Loupe.LanguageTest do
     end
 
     @case ~s|get User where age = 18 and name = "Bob"|
-    test "supports and boolean operatand" do
+    test "supports and boolean operand" do
       assert {:ok,
               %GetAst{
                 predicates:
@@ -111,7 +158,7 @@ defmodule Loupe.LanguageTest do
     end
 
     @case ~s|get User where (age = 18 and name = "Bob") or (age > 50)|
-    test "supports scoped boolean operatand" do
+    test "supports scoped boolean operand" do
       assert {:ok,
               %GetAst{
                 predicates:

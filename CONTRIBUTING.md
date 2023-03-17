@@ -22,7 +22,7 @@ I'd be extremely happy to receive pull requests, really! But I like the code to 
 
 - **Must** be kept short, 10 actual statements is around the maximum length.
 - **Must** have a maximum of 2 level of indentation, that means, no nested case for instance.
-- **Must** pipe into a case statement. Assign to a variable and use in the case statement.
+- **Must not** pipe into a case statement. Assign to a variable and use in the case statement.
 - **Must** not use `__MODULE__` for lazyness reason. Prefer aliasing the whole module name.
   - Note: `__MODULE__` could be used in the case of a macro to refer to current module.
 - Macro calls **must** have parenthese except kernel macros (like `defmodule`, for instance).

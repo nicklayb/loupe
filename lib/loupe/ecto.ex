@@ -51,6 +51,14 @@ if Code.ensure_loaded?(Ecto) do
       |> limit_query(ast)
       |> join_relation(context)
       |> filter_query(ast, context)
+      |> select_allowed_fields(context)
+    end
+
+    defp select_allowed_fields(query, context) do
+      case Context.selectable_fields(context) do
+        :all -> query
+        fields -> select(query, ^fields)
+      end
     end
 
     defp filter_query(query, %GetAst{predicates: predicates}, context) do

@@ -6,20 +6,30 @@ defmodule Loupe.TestCase do
   use ExUnit.CaseTemplate
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Loupe.Test.Ecto.Repo
 
   using do
     quote do
       import Loupe.Fixture
+      import Loupe.TestCase
 
       setup [:load_schemas]
     end
   end
 
-  setup [:start_repo]
-
   def start_repo(_tags) do
     {:ok, _} = Application.ensure_all_started(:ecto)
+    pid = Sandbox.start_owner!(Repo, shared: true)
+    Sandbox.mode(Repo, {:shared, self()})
 
-    :ok = Sandbox.checkout(Loupe.Test.Ecto.Repo)
+    on_exit(fn ->
+      :ok = Sandbox.stop_owner(pid)
+    end)
+    :ok
+  end
+
+  def checkout_repo(_tags) do
+    :ok = Sandbox.checkout(Repo)
+    :ok
   end
 end

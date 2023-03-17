@@ -75,6 +75,55 @@ if Code.ensure_loaded?(Ecto) do
       end
     end
 
+    @doc "Same as `selectable_fields/1` but for the root schema"
+    @spec selectable_fields(t()) :: [atom()]
+    def selectable_fields(%Context{root_schema: root_schema} = context),
+      do: selectable_fields(context, root_schema)
+
+    @doc """
+    Gets fields that can be selected infering the foreign keys. For instance,
+    if someone allows `user` belong_to relationship on `Post̀`, the `user_id` 
+    is automatically returned and there is no need for it to be allowed.
+    """
+    @spec selectable_fields(t(), schema()) :: [atom()]
+    def selectable_fields(%Context{implementation: implementation, assigns: assigns}, schema) do
+      fields = schema.__schema__(:fields)
+
+      case implementation.schema_fields(schema, assigns) do
+        :all ->
+          fields
+
+        {:only, fields} ->
+          schema
+          |> allowed_foreign_keys(fields)
+          |> then(&Kernel.++(schema.__schema__(:primary_key), &1))
+          |> Enum.uniq()
+      end
+    end
+
+    defp allowed_foreign_keys(schema, fields) do
+      associations = schema.__schema__(:associations)
+
+      Enum.reduce(fields, fields, fn field_name, accumulator ->
+        if field_name in associations do
+          :association
+          |> schema.__schema__(field_name)
+          |> accumulate_foreign_keys(accumulator)
+          |> Kernel.--(associations)
+        else
+          accumulator
+        end
+      end)
+    end
+
+    defp accumulate_foreign_keys(
+           %Ecto.Association.BelongsTo{field: field, owner_key: owner_key},
+           accumulator
+         ),
+         do: [owner_key | accumulator] -- [field]
+
+    defp accumulate_foreign_keys(_, accumulator), do: accumulator
+
     @doc """
     Puts root schema in the context validating it's a valid Ecto schema
     """

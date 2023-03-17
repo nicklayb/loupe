@@ -79,6 +79,29 @@ defmodule Loupe.Ecto.ContextTest do
     end
   end
 
+  describe "selectable_fields/" do
+    setup [
+      :create_context,
+      :with_root_schema
+    ]
+
+    test "gets selectable fields", %{context: context} do
+      assert [:id, :name, :email, :age, :active, :role_id] = Context.selectable_fields(context)
+    end
+  end
+
+  describe "selectable_fields/2" do
+    setup [
+      :create_context,
+      :with_root_schema
+    ]
+
+    test "gets selectable fields", %{context: context} do
+      assert [:id, :name, :email, :age, :active, :role_id] =
+               Context.selectable_fields(context, User)
+    end
+  end
+
   describe "sorted_bidings/1" do
     setup [
       :create_context,

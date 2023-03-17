@@ -1,5 +1,5 @@
 defmodule Loupe.EctoTest do
-  use Loupe.TestCase
+  use Loupe.TestCase, async: false
 
   alias Loupe.Ecto, as: LoupeEcto
   alias Loupe.Test.Ecto.Comment
@@ -10,7 +10,11 @@ defmodule Loupe.EctoTest do
 
   @implementation Loupe.Test.Ecto.Definition
 
-  setup [:setup_entities]
+  setup_all [
+    :start_repo,
+    :setup_entities,
+    :checkout_repo
+  ]
 
   describe "build_query/1" do
     test "builds query joining binding and applying predicates from string" do
@@ -125,6 +129,25 @@ defmodule Loupe.EctoTest do
                %User{email: "something@gmail.com"}
              ] = run_query(~L|get all User where name not :empty|)
     end
+
+    test "selects only allowed fields" do
+      assert [
+               %User{name: "Jane Doe", email: "user@email.com"}
+             ] = run_query(~L|get all User where email = "user@email.com"|, %{role: "admin"})
+
+      assert [
+               %User{name: nil, email: "user@email.com"}
+             ] = run_query(~L|get all User where email = "user@email.com"|, %{role: "user"})
+    end
+
+    test "returns error if query field is not allowed" do
+      assert {:error, {:invalid_binding, "name"}} =
+               LoupeEcto.build_query(
+                 ~L|get all User where name = "John Doe"|,
+                 @implementation,
+                 %{role: "user"}
+               )
+    end
   end
 
   defp setup_entities(_) do
@@ -159,7 +182,7 @@ defmodule Loupe.EctoTest do
         %Post{
           title: "My amzing post",
           comments: [
-            %Comment{text: "Should not be fetched"}
+            %Comment{text: "That's a comment"}
           ]
         }
       ]

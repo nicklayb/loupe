@@ -38,7 +38,12 @@ defmodule Loupe.LanguageTest do
   end
 
   describe "compile/1 predicates" do
-    @case ~s|get User where age > 18|
+    @case ~s|get Post where user_id = 1|
+    test "supports underscored fields" do
+      assert {:ok, %GetAst{predicates: {:=, {:binding, ["user_id"]}, {:int, 1}}}} =
+               Language.compile(@case)
+    end
+
     test "supports > operator" do
       assert {:ok, %GetAst{predicates: {:>, {:binding, ["age"]}, {:int, 18}}}} =
                Language.compile(@case)

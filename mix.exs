@@ -48,7 +48,7 @@ defmodule Loupe.MixProject do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(environment) when environment in ~w(dev test)a, do: ["lib", "test/support"]
 
   defp elixirc_paths(_), do: ["lib"]
 

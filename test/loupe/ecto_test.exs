@@ -3,10 +3,12 @@ defmodule Loupe.EctoTest do
 
   alias Loupe.Ecto, as: LoupeEcto
   alias Loupe.Test.Ecto.Comment
+  alias Loupe.Test.Ecto.ExternalKey
   alias Loupe.Test.Ecto.Post
   alias Loupe.Test.Ecto.Repo
   alias Loupe.Test.Ecto.Role
   alias Loupe.Test.Ecto.User
+  alias Loupe.Test.Ecto.UserExternalKey
 
   @implementation Loupe.Test.Ecto.Definition
 
@@ -130,6 +132,15 @@ defmodule Loupe.EctoTest do
              ] = run_query(~L|get all User where name not :empty|)
     end
 
+    test "selects has_many through relation" do
+      assert [
+               %User{name: "Jane Doe", email: "user@email.com"}
+             ] =
+               run_query(~L|get all User where external_keys.external_id = "janedoe"|, %{
+                 role: "admin"
+               })
+    end
+
     test "selects only allowed fields" do
       assert [
                %User{name: "Jane Doe", email: "user@email.com"}
@@ -163,6 +174,11 @@ defmodule Loupe.EctoTest do
             %Comment{text: "That's something"}
           ]
         }
+      ],
+      user_external_keys: [
+        %UserExternalKey{
+          external_key: %ExternalKey{external_id: "janedoe"}
+        }
       ]
     })
 
@@ -171,7 +187,12 @@ defmodule Loupe.EctoTest do
       active: true,
       name: "John Doe",
       email: "something@gmail.com",
-      role: %Role{slug: "user"}
+      role: %Role{slug: "user"},
+      user_external_keys: [
+        %UserExternalKey{
+          external_key: %ExternalKey{external_id: "johndoe"}
+        }
+      ]
     })
 
     Repo.insert!(%User{

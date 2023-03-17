@@ -44,6 +44,7 @@ defmodule Loupe.LanguageTest do
                Language.compile(@case)
     end
 
+      @case ~s|get Post where age > 18|
     test "supports > operator" do
       assert {:ok, %GetAst{predicates: {:>, {:binding, ["age"]}, {:int, 18}}}} =
                Language.compile(@case)

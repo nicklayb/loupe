@@ -4,9 +4,12 @@ defmodule Loupe.Fixture do
   alias Loupe.Ecto.Context
   alias Loupe.Language
   alias Loupe.Language.GetAst
+  alias Loupe.Test.Ecto.Comment
+  alias Loupe.Test.Ecto.ExternalKey
   alias Loupe.Test.Ecto.Post
   alias Loupe.Test.Ecto.Role
   alias Loupe.Test.Ecto.User
+  alias Loupe.Test.Ecto.UserExternalKey
 
   @implementation Loupe.Test.Ecto.Definition
 
@@ -27,7 +30,7 @@ defmodule Loupe.Fixture do
 
   def load_schemas(_) do
     # Not 100% sure why, but `__schema__/1` needs to be called once before `function_exported?/3` works.
-    Enum.each([User, Role, Post], fn schema ->
+    Enum.each([Comment, ExternalKey, UserExternalKey, User, Role, Post], fn schema ->
       schema.__schema__(:fields)
       schema.__schema__(:associations)
     end)

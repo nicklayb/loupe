@@ -201,11 +201,25 @@ if Code.ensure_loaded?(Ecto) do
     defp validate_binding(%Context{} = context, schema, [association | rest], accumulator) do
       atom_association = String.to_existing_atom(association)
 
-      with %{queryable: queryable} <- schema.__schema__(:association, atom_association),
-           true <- schema_field_allowed?(context, schema, atom_association) do
+      with true <- schema_field_allowed?(context, schema, atom_association) do
+        queryable = through_association_queryable(schema, [atom_association])
         validate_binding(context, queryable, rest, [atom_association | accumulator])
       else
         _ -> {:error, {:invalid_binding, association}}
+      end
+    end
+
+    defp through_association_queryable(schema, []), do: schema
+
+    defp through_association_queryable(schema, [association | rest]) do
+      case schema.__schema__(:association, association) do
+        %Ecto.Association.HasThrough{through: through} ->
+          schema
+          |> through_association_queryable(through)
+          |> through_association_queryable(rest)
+
+        %{queryable: queryable} ->
+          through_association_queryable(queryable, rest)
       end
     end
 

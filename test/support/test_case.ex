@@ -19,12 +19,14 @@ defmodule Loupe.TestCase do
 
   def start_repo(_tags) do
     {:ok, _} = Application.ensure_all_started(:ecto)
+    Repo.start_link()
     pid = Sandbox.start_owner!(Repo, shared: true)
     Sandbox.mode(Repo, {:shared, self()})
 
     on_exit(fn ->
       :ok = Sandbox.stop_owner(pid)
     end)
+
     :ok
   end
 

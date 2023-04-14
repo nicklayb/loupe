@@ -5,6 +5,10 @@
 
 Loupe is query language for Ecto schema inspection in a safe and configurable manner.
 
+## Important
+
+Until Loupe reaches `1.x.x`, it's considered experimental. The syntax will change, APIs will change and structure will too. We'll do our best to respect semantic versioning and avoid big breaking changes but they can happen.
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

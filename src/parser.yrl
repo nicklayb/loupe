@@ -9,8 +9,8 @@ quantifier predicates predicate expression binding literal list inner_list strin
 
 Rootsymbol expression.
 
-expression -> get quantifier identifier where predicates : {get, '$2', unwrap('$3'), '$5'}.
-expression -> get identifier where predicates : {get, {int, 1}, unwrap('$2'), '$4'}.
+expression -> identifier quantifier identifier where predicates : {unwrap('$1'), '$2', unwrap('$3'), '$5'}.
+expression -> identifier identifier where predicates : {unwrap('$1'), {int, 1}, unwrap('$2'), '$4'}.
 
 quantifier -> all : all.
 quantifier -> positive_integer : {int, unwrap('$1')}.

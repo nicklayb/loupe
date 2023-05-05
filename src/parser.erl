@@ -298,7 +298,7 @@ yeccpars2(Other, _, _, _, _, _, _) ->
 
 -dialyzer({nowarn_function, yeccpars2_0/7}).
 -compile({nowarn_unused_function,  yeccpars2_0/7}).
-yeccpars2_0(S, 'get', Ss, Stack, T, Ts, Tzr) ->
+yeccpars2_0(S, 'identifier', Ss, Stack, T, Ts, Tzr) ->
  yeccpars1(S, 2, Ss, Stack, T, Ts, Tzr);
 yeccpars2_0(_, _, _, _, T, _, _) ->
  yeccerror(T).
@@ -775,7 +775,7 @@ yeccpars2_7_(__Stack0) ->
 yeccpars2_9_(__Stack0) ->
  [___4,___3,___2,___1 | __Stack] = __Stack0,
  [begin
-                                                {get, {int, 1}, unwrap(___2), ___4}
+                                                       {unwrap(___1), {int, 1}, unwrap(___2), ___4}
   end | __Stack].
 
 -compile({inline,yeccpars2_10_/1}).
@@ -1025,7 +1025,7 @@ yeccpars2_49_(__Stack0) ->
 yeccpars2_52_(__Stack0) ->
  [___5,___4,___3,___2,___1 | __Stack] = __Stack0,
  [begin
-                                                           {get, ___2, unwrap(___3), ___5}
+                                                                  {unwrap(___1), ___2, unwrap(___3), ___5}
   end | __Stack].
 
 

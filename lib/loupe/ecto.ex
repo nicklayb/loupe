@@ -7,45 +7,55 @@ if Code.ensure_loaded?(Ecto) do
     import Ecto.Query
     alias Loupe.Ecto.Context
     alias Loupe.Language
-    alias Loupe.Language.GetAst
+    alias Loupe.Language.Ast
 
     @root_binding :root
 
-    @type ast :: GetAst.t()
+    @doc "Same as build_query/2 but with context or with implementation with no assigns"
+    @spec build_query(Ast.t() | binary(), Context.implementation() | Context.t()) ::
+            {:ok, Ecto.Query.t(), Context.t()} | {:error, atom()}
+
+    def build_query(string_or_ast, implementation) when is_atom(implementation) do
+      build_query(string_or_ast, implementation, %{})
+    end
+
+    def build_query(string_or_ast, %Context{} = context) do
+      with {:ok, %Ast{} = ast} <- maybe_compile_ast(string_or_ast) do
+        create_query(ast, context)
+      end
+    end
 
     @doc """
     Builds an Ecto query from either an AST or a string. It requires an implementation
     of the Loupe.Ecto.Definition behaviour and supports assigns as a third parameter.
     """
-    @spec build_query(ast() | binary(), Context.implementation(), map()) ::
-            {:ok, Ecto.Query.t()} | {:error, atom()}
-    def build_query(string, implementation, context_assigns \\ %{})
+    @spec build_query(Ast.t() | binary(), Context.implementation(), map()) ::
+            {:ok, Ecto.Query.t(), Context.t()} | {:error, atom()}
 
-    def build_query(string, implementation, context_assigns) when is_binary(string) do
-      with {:ok, %GetAst{} = ast} <- Language.compile(string) do
-        build_query(ast, implementation, context_assigns)
-      end
+    def build_query(string_or_ast, implementation, assigns) do
+      build_query(string_or_ast, Context.new(implementation, assigns))
     end
 
-    def build_query(%GetAst{} = ast, implementation, context_assigns) do
-      context = Context.new(implementation, context_assigns)
+    defp maybe_compile_ast(string) when is_binary(string), do: Language.compile(string)
+    defp maybe_compile_ast(%Ast{} = ast), do: {:ok, ast}
 
+    defp create_query(%Ast{} = ast, %Context{} = context) do
       with {:ok, context} <- put_root_schema(ast, context),
            {:ok, context} <- extract_bindings(ast, context) do
-        {:ok, to_query(ast, context)}
+        {:ok, to_query(ast, context), context}
       end
     end
 
-    defp extract_bindings(%GetAst{} = ast, %Context{} = context) do
-      bindings = GetAst.bindings(ast)
+    defp extract_bindings(%Ast{} = ast, %Context{} = context) do
+      bindings = Ast.bindings(ast)
       Context.put_bindings(context, bindings)
     end
 
-    defp put_root_schema(%GetAst{schema: schema}, %Context{} = context) do
+    defp put_root_schema(%Ast{schema: schema}, %Context{} = context) do
       Context.put_root_schema(context, schema)
     end
 
-    defp to_query(%GetAst{} = ast, %Context{root_schema: root_schema} = context) do
+    defp to_query(%Ast{} = ast, %Context{root_schema: root_schema} = context) do
       root_schema
       |> from(as: ^@root_binding)
       |> limit_query(ast)
@@ -61,7 +71,7 @@ if Code.ensure_loaded?(Ecto) do
       end
     end
 
-    defp filter_query(query, %GetAst{predicates: predicates}, context) do
+    defp filter_query(query, %Ast{predicates: predicates}, context) do
       conditions = apply_filter(predicates, context)
 
       from(query, where: ^conditions)
@@ -201,11 +211,11 @@ if Code.ensure_loaded?(Ecto) do
       {top_binding, parent_binding}
     end
 
-    defp limit_query(query, %GetAst{quantifier: :all}) do
+    defp limit_query(query, %Ast{quantifier: :all}) do
       query
     end
 
-    defp limit_query(query, %GetAst{quantifier: {:range, {minimum, maximum}}}) do
+    defp limit_query(query, %Ast{quantifier: {:range, {minimum, maximum}}}) do
       limit = maximum - minimum
 
       query
@@ -213,7 +223,7 @@ if Code.ensure_loaded?(Ecto) do
       |> offset(^minimum)
     end
 
-    defp limit_query(query, %GetAst{quantifier: {:int, total}}) do
+    defp limit_query(query, %Ast{quantifier: {:int, total}}) do
       limit(query, ^total)
     end
   end

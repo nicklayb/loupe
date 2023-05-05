@@ -171,7 +171,11 @@ if Code.ensure_loaded?(Ecto) do
 
       Enum.reduce(unzipped_bindings, context, fn unzipped_binding,
                                                  %Context{bindings: bindings} = accumulator ->
-        bindings = Map.put(bindings, unzipped_binding, next_binding(accumulator))
+        bindings =
+          if Map.has_key?(bindings, unzipped_binding),
+            do: bindings,
+            else: Map.put(bindings, unzipped_binding, next_binding(accumulator))
+
         %Context{accumulator | bindings: bindings}
       end)
     end

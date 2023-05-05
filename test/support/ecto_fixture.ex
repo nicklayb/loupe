@@ -16,6 +16,8 @@ defmodule Loupe.Test.Ecto do
     schema("comments") do
       field(:text, :string)
       field(:post_id, :integer)
+
+      belongs_to(:author, Module.concat(["Loupe", "Test", "Ecto", "User"]))
     end
   end
 

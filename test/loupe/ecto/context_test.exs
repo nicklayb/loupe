@@ -79,9 +79,9 @@ defmodule Loupe.Ecto.ContextTest do
       assert {:ok,
               %Context{
                 bindings: %{
-                  [:posts] => _,
-                  [:posts, :comments] => _,
-                  [:posts, :comments, :author] => _
+                  [:posts] => :a1,
+                  [:posts, :comments] => :a0,
+                  [:posts, :comments, :author] => :a2
                 }
               }} = Context.put_bindings(context, [["posts", "comments", "text"], ["posts", "comments", "author", "name"]])
     end

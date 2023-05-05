@@ -48,7 +48,6 @@ Rules.
 {DoubleDot}     : {token, {double_dot,        TokenLine, list_to_atom(TokenChars)}}.
 {All}           : {token, {all,               TokenLine, list_to_atom(TokenChars)}}.
 {As}            : {token, {as,                TokenLine, list_to_atom(TokenChars)}}.
-{Get}           : {token, {get,               TokenLine, list_to_atom(TokenChars)}}.
 {Where}         : {token, {where,             TokenLine, list_to_atom(TokenChars)}}.
 {Empty}         : {token, {empty,             TokenLine, list_to_atom(TokenChars)}}.
 {PositiveInt}   : {token, {positive_integer,  TokenLine, list_to_integer(TokenChars)}}.

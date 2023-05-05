@@ -3,7 +3,7 @@ defmodule Loupe.Fixture do
 
   alias Loupe.Ecto.Context
   alias Loupe.Language
-  alias Loupe.Language.GetAst
+  alias Loupe.Language.Ast
   alias Loupe.Test.Ecto.Comment
   alias Loupe.Test.Ecto.ExternalKey
   alias Loupe.Test.Ecto.Post
@@ -39,7 +39,7 @@ defmodule Loupe.Fixture do
   end
 
   def sigil_L(query, _) do
-    {:ok, %GetAst{} = ast} = Language.compile(query)
+    {:ok, %Ast{} = ast} = Language.compile(query)
 
     ast
   end

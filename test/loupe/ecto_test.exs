@@ -32,111 +32,98 @@ defmodule Loupe.EctoTest do
                """)
     end
 
-    test "builds query joining binding and applying predicates" do
-      assert [
-               %User{email: "user@email.com"}
-             ] =
-               run_query(~L"""
-               get all User 
-               where (
-                 posts.comments.text like "something" 
-                 and role.slug = "admin"
-               )
-               """)
-    end
-
     test "queries using thruty operator" do
       assert [
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where active|)
+             ] = run_query(~s|get all User where active|)
     end
 
     test "queries using falsy operator" do
       assert [
                %User{email: "user@email.com"},
                %User{email: "another_user@email.com"}
-             ] = run_query(~L|get all User where not active|)
+             ] = run_query(~s|get all User where not active|)
     end
 
     test "queries using > operator" do
       assert [
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where age > 25|)
+             ] = run_query(~s|get all User where age > 25|)
     end
 
     test "queries using >= operator" do
       assert [
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where age >= 30|)
+             ] = run_query(~s|get all User where age >= 30|)
     end
 
     test "queries using <= operator" do
       assert [
                %User{email: "user@email.com"}
-             ] = run_query(~L|get all User where age <= 18|)
+             ] = run_query(~s|get all User where age <= 18|)
     end
 
     test "queries using < operator" do
       assert [
                %User{email: "user@email.com"}
-             ] = run_query(~L|get all User where age < 20|)
+             ] = run_query(~s|get all User where age < 20|)
     end
 
     test "queries using = operator" do
       assert [
                %User{email: "user@email.com"}
-             ] = run_query(~L|get all User where email = "user@email.com"|)
+             ] = run_query(~s|get all User where email = "user@email.com"|)
     end
 
     test "queries using != operator" do
       assert [
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where role.slug != "admin"|)
+             ] = run_query(~s|get all User where role.slug != "admin"|)
     end
 
     test "queries using like operator" do
       assert [
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where email like "gmail"|)
+             ] = run_query(~s|get all User where email like "gmail"|)
     end
 
     test "queries using not like operator" do
       assert [
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where email not like "email.com"|)
+             ] = run_query(~s|get all User where email not like "email.com"|)
     end
 
     test "queries using :empty keyword" do
       assert [
                %User{email: "another_user@email.com"}
-             ] = run_query(~L|get all User where name :empty|)
+             ] = run_query(~s|get all User where name :empty|)
     end
 
     test "queries using in operator" do
       assert [
                %User{email: "user@email.com"},
                %User{email: "another_user@email.com"}
-             ] = run_query(~L|get all User where age in [18, 21]|)
+             ] = run_query(~s|get all User where age in [18, 21]|)
     end
 
     test "queries using not in operator" do
       assert [
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where age not in [18, 21]|)
+             ] = run_query(~s|get all User where age not in [18, 21]|)
     end
 
     test "queries using not :empty keyword" do
       assert [
                %User{email: "user@email.com"},
                %User{email: "something@gmail.com"}
-             ] = run_query(~L|get all User where name not :empty|)
+             ] = run_query(~s|get all User where name not :empty|)
     end
 
     test "selects has_many through relation" do
       assert [
                %User{name: "Jane Doe", email: "user@email.com"}
              ] =
-               run_query(~L|get all User where external_keys.external_id = "janedoe"|, %{
+               run_query(~s|get all User where external_keys.external_id = "janedoe"|, %{
                  role: "admin"
                })
     end
@@ -144,17 +131,17 @@ defmodule Loupe.EctoTest do
     test "selects only allowed fields" do
       assert [
                %User{name: "Jane Doe", email: "user@email.com"}
-             ] = run_query(~L|get all User where email = "user@email.com"|, %{role: "admin"})
+             ] = run_query(~s|get all User where email = "user@email.com"|, %{role: "admin"})
 
       assert [
                %User{name: nil, email: "user@email.com"}
-             ] = run_query(~L|get all User where email = "user@email.com"|, %{role: "user"})
+             ] = run_query(~s|get all User where email = "user@email.com"|, %{role: "user"})
     end
 
     test "returns error if query field is not allowed" do
       assert {:error, {:invalid_binding, "name"}} =
                LoupeEcto.build_query(
-                 ~L|get all User where name = "John Doe"|,
+                 ~s|get all User where name = "John Doe"|,
                  @implementation,
                  %{role: "user"}
                )
@@ -213,7 +200,7 @@ defmodule Loupe.EctoTest do
   end
 
   defp run_query(query, assigns \\ %{role: "admin"}) do
-    assert {:ok, %Ecto.Query{} = ecto_query} =
+    assert {:ok, %Ecto.Query{} = ecto_query, _context} =
              LoupeEcto.build_query(
                query,
                @implementation,

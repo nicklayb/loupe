@@ -1,12 +1,16 @@
-defmodule Loupe.Language.GetAst do
+defmodule Loupe.Language.Ast do
   @moduledoc """
-  Extracted AST structure from a `get` query.
+  Extracted AST structure query.
 
   It uses a basic syntax like 
 
   ```
-  get [quantifier?] [schema] where [predicates]
+  [action] [quantifier?] [schema] where [predicates]
   ```
+
+  The `action` is any alphanumeric value. It can be used to specify what
+  do you aim to use the query for. It could ̀`ecto` for instance that you 
+  query Ecto with, or even `ets` that lookup an `ets` table with match spec.
 
   The quantifier is used to limit the queries result but can be ommited 
   defaulting to `1`. It supports the following:
@@ -24,12 +28,16 @@ defmodule Loupe.Language.GetAst do
   basically be a syntax like
 
   ```
+  # could match `get` and run query on Ecto.
   get 5 User where (name = "John Doe") or (age > 18)
+
+  # count match `protobuf` to query Ecto and generate Protobufs.
+  protobuf all BoardGame where name like "Catan"
   ```
   """
-  defstruct [:quantifier, :predicates, :schema]
+  defstruct [:action, :quantifier, :predicates, :schema]
 
-  alias Loupe.Language.GetAst
+  alias Loupe.Language.Ast
 
   @typedoc "Range from one value to another"
   @type range :: {integer(), integer()}
@@ -39,6 +47,9 @@ defmodule Loupe.Language.GetAst do
           {:float, float()}
           | {:int, integer()}
           | {:string, binary()}
+
+  @typedoc "Alpha identifier"
+  @type alpha_identifier :: charlist()
 
   @typedoc "Composed bidings from nested querying"
   @type binding :: {:binding, [binary]}
@@ -60,7 +71,8 @@ defmodule Loupe.Language.GetAst do
   @typedoc "Reserved keywords"
   @type reserved_keyword :: :empty
 
-  @type t :: %GetAst{
+  @type t :: %Ast{
+          action: binary(),
           quantifier: quantifier(),
           schema: binary(),
           predicates: predicate()
@@ -79,9 +91,10 @@ defmodule Loupe.Language.GetAst do
   defguard is_reserved_keyword(reserved_keyword) when reserved_keyword in @reserved_keywords
 
   @doc "Instanciates the AST"
-  @spec new(binding(), quantifier(), predicate()) :: t()
-  def new(binding, quantifier, predicates) do
-    %GetAst{
+  @spec new(alpha_identifier(), alpha_identifier(), quantifier(), predicate()) :: t()
+  def new(action, binding, quantifier, predicates) do
+    %Ast{
+      action: to_string(action),
       quantifier: quantifier,
       predicates: walk_predicates(predicates),
       schema: to_string(binding)
@@ -128,7 +141,7 @@ defmodule Loupe.Language.GetAst do
 
   @doc "Extracts bindings of an AST"
   @spec bindings(t()) :: [[binary()]]
-  def bindings(%GetAst{predicates: predicates}) do
+  def bindings(%Ast{predicates: predicates}) do
     extract_bindings(predicates, [])
   end
 

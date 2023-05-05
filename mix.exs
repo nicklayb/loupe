@@ -54,8 +54,8 @@ defmodule Loupe.MixProject do
 
   defp deps do
     [
-      {:ecto, "~> 3.9.4", optional: true},
-      {:ecto_sql, "~> 3.9.2", optional: true},
+      {:ecto, "~> 3.0", optional: true},
+      {:ecto_sql, "~> 3.0", optional: true},
       {:ecto_sqlite3, "~> 0.9.1", only: [:dev, :test]},
       {:credo, "~> 1.6.7", only: [:dev, :test]},
       {:excoveralls, "~> 0.16", only: :test},

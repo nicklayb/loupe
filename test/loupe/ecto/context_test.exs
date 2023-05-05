@@ -75,6 +75,15 @@ defmodule Loupe.Ecto.ContextTest do
                   [:external_keys] => :a0
                 }
               }} = Context.put_bindings(context, [["external_keys", "external_id"]])
+
+      assert {:ok,
+              %Context{
+                bindings: %{
+                  [:posts] => _,
+                  [:posts, :comments] => _,
+                  [:posts, :comments, :author] => _
+                }
+              }} = Context.put_bindings(context, [["posts", "comments", "text"], ["posts", "comments", "author", "name"]])
     end
 
     @tag assigns: %{role: "user"}

@@ -6,7 +6,7 @@ defmodule Loupe.MixProject do
   def project do
     [
       app: :loupe,
-      version: "0.4.2",
+      version: "0.5.0",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -54,6 +54,7 @@ defmodule Loupe.MixProject do
 
   defp deps do
     [
+      {:phoenix_live_view, "~> 0.18", optional: true},
       {:ecto, "~> 3.0", optional: true},
       {:ecto_sql, "~> 3.0", optional: true},
       {:ecto_sqlite3, "~> 0.9.1", only: [:dev, :test]},

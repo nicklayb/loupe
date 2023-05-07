@@ -25,6 +25,9 @@ defmodule Loupe.Language do
       {:error, {line, :parser, messages}} -> %ParserError{line: line, message: messages}
       {:error, {line, :lexer, messages}} -> %LexerError{line: line, message: messages}
     end
+  rescue
+    error ->
+      {:error, error}
   end
 
   defp new_ast({action, quantifier, schema, predicates}) do

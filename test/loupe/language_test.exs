@@ -179,6 +179,11 @@ defmodule Loupe.LanguageTest do
                     {:=, {:binding, ["name"]}, {:string, "Bob"}}},
                    {:>, {:binding, ["age"]}, {:int, 50}}}
               }} = Language.compile(@case)
+                end
+
+    @failing_case ~s|get User where name = "d|
+    test "intercepts raise errors" do
+      assert {:error, %ArgumentError{}} = Language.compile(@failing_case)
     end
   end
 end

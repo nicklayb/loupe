@@ -5,6 +5,8 @@
 
 Loupe is query language for Ecto schema inspection in a safe and configurable manner.
 
+You can see [this example app](https://github.com/nicklayb/loupe_example) to understand how it applies with Ecto.
+
 ## Important
 
 Until Loupe reaches `1.x.x`, it's considered experimental. The syntax will change, APIs will change and structure will too. We'll do our best to respect semantic versioning and avoid big breaking changes but they can happen.

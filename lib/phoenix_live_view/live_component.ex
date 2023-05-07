@@ -62,7 +62,7 @@ if Code.ensure_loaded?(Phoenix.Component) do
       assigns = assign_new(assigns, :inspect_modules, fn -> [] end)
 
       ~H"""
-      <div>
+      <div class="loupe-root">
         <%= case @result do %>
           <% [_ | _] = list -> %>
             <.render_many 
@@ -91,7 +91,7 @@ if Code.ensure_loaded?(Phoenix.Component) do
 
     defp render_many(assigns) do
       ~H"""
-      <span class="text-gray-700"><%= length(@results) %> records</span>
+      <span class="loupe-record-count"><%= length(@results) %> records</span>
       <%= Enum.with_index(@results, fn item, index -> %>
         <.render
           result={item}
@@ -114,19 +114,19 @@ if Code.ensure_loaded?(Phoenix.Component) do
       <% else %>
         <%= case @struct do %>
           <% %Ecto.Association.NotLoaded{} = association -> %>
-            <em class="font-bold"><.association association={association} /></em>
+            <em class="loupe-association-not-loaded"><.association association={association} /></em>
           <% %struct{} -> %>
-            <div class="mt-3 py-2 pl-3 font-bold bg-slate-600/10"><%= top_level_type(struct) %></div>
-            <div class="pl-3 py-2 bg-slate-400/10">
-              <table class="w-full">
+            <div class="loupe-struct-name"><%= top_level_type(struct) %></div>
+            <div class="loupe-struct-value">
+              <table class="loupe-struct-value-table">
                 <%= for %{name: field_name, value: field_value, state: state} <- @fields do %>
                   <tr>
-                    <td class="pr-2 pl-2 border align-top whitespace-nowrap">
+                    <td class="loupe-struct-field-name">
                       <.toggleable state={state} key={[field_name | @key]}>
                         <%= field_name %>
                       </.toggleable>
                     </td>
-                    <td class="w-full px-2 border">
+                    <td class="loupe-struct-field-value">
                       <.render 
                         result={field_value}
                         definition={@definition}
@@ -154,15 +154,15 @@ if Code.ensure_loaded?(Phoenix.Component) do
       ~H"""
       <%= case @state do %>
         <% :expanded -> %>
-          <a href="#" phx-click="loupe:collapse" phx-value-key={@key}>
-            <span class="font-mono font-bold">-</span>&nbsp<%= render_slot(@inner_block) %>
+          <a href="#" class="loupe-collapse-field-name" phx-click="loupe:collapse" phx-value-key={@key}>
+            <span class="loupe-expand-minus">-</span>&nbsp<%= render_slot(@inner_block) %>
           </a>
         <% :collapsed -> %>
-          <a href="#" phx-click="loupe:expand" phx-value-key={@key}>
-            <span class="font-mono font-bold">+</span>&nbsp<%= render_slot(@inner_block) %>
+          <a href="#" class="loupe-expand-field-name" phx-click="loupe:expand" phx-value-key={@key}>
+            <span class="loupe-expand-plus">+</span>&nbsp<%= render_slot(@inner_block) %>
           </a>
         <% _ -> %>
-          <span class="pl-4"><%= render_slot(@inner_block) %></span>
+          <span class="loupe-primitive-field-name"><%= render_slot(@inner_block) %></span>
       <% end %>
       """
     end

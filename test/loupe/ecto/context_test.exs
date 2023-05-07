@@ -83,7 +83,11 @@ defmodule Loupe.Ecto.ContextTest do
                   [:posts, :comments] => :a0,
                   [:posts, :comments, :author] => :a2
                 }
-              }} = Context.put_bindings(context, [["posts", "comments", "text"], ["posts", "comments", "author", "name"]])
+              }} =
+               Context.put_bindings(context, [
+                 ["posts", "comments", "text"],
+                 ["posts", "comments", "author", "name"]
+               ])
     end
 
     @tag assigns: %{role: "user"}

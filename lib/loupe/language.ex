@@ -22,8 +22,8 @@ defmodule Loupe.Language do
          {:ok, ast} <- :parser.parse(tokens) do
       {:ok, new_ast(ast)}
     else
-      {:error, {line, :parser, messages}} -> %ParserError{line: line, message: messages}
-      {:error, {line, :lexer, messages}} -> %LexerError{line: line, message: messages}
+      {:error, {line, :parser, messages}} -> {:error, %ParserError{line: line, message: messages}}
+      {:error, {line, :lexer, messages}} -> {:error, %LexerError{line: line, message: messages}}
     end
   rescue
     error ->

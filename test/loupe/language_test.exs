@@ -7,13 +7,13 @@ defmodule Loupe.LanguageTest do
     @case ~s|get all User where email = "user@email.com"|
     test "compiles a string" do
       assert {:ok,
-        %Ast{
-          action: "get",
+              %Ast{
+                action: "get",
                 schema: "User",
                 predicates: {:=, {:binding, ["email"]}, {:string, "user@email.com"}},
                 quantifier: :all
               }} = Language.compile(@case)
-                end
+    end
 
     @case ~s|ecto all User where email = "user@email.com"|
     test "compiles a different action" do
@@ -88,8 +88,7 @@ defmodule Loupe.LanguageTest do
 
     @case ~s|get User where age :empty|
     test "supports :empty keyword" do
-      assert {:ok, %Ast{predicates: {:=, {:binding, ["age"]}, :empty}}} =
-               Language.compile(@case)
+      assert {:ok, %Ast{predicates: {:=, {:binding, ["age"]}, :empty}}} = Language.compile(@case)
     end
 
     @case ~s|get User where age|
@@ -99,8 +98,7 @@ defmodule Loupe.LanguageTest do
 
     @case ~s|get User where not age|
     test "supports falsy expression" do
-      assert {:ok, %Ast{predicates: {:=, {:binding, ["age"]}, false}}} =
-               Language.compile(@case)
+      assert {:ok, %Ast{predicates: {:=, {:binding, ["age"]}, false}}} = Language.compile(@case)
     end
 
     @case ~s|get User where age not :empty|
@@ -179,7 +177,7 @@ defmodule Loupe.LanguageTest do
                     {:=, {:binding, ["name"]}, {:string, "Bob"}}},
                    {:>, {:binding, ["age"]}, {:int, 50}}}
               }} = Language.compile(@case)
-                end
+    end
 
     @failing_case ~s|get User where name = "d|
     test "intercepts raise errors" do

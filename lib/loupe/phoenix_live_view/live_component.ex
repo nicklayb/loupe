@@ -90,7 +90,11 @@ if Code.ensure_loaded?(Phoenix.Component) do
             />
 
           <% other -> %>
-            <.render_primitive result={other} />
+            <.render_primitive
+              result={other}
+              renderer={@renderer}
+              definition_assigns={@definition_assigns}
+            />
         <% end %>
       </div>
       """
@@ -186,7 +190,13 @@ if Code.ensure_loaded?(Phoenix.Component) do
 
     defp render_primitive(assigns) do
       ~H"""
-      <%= inspect(@result) %>
+      <%= case Renderer.render_type(@renderer, @result, @definition_assigns) do %>
+        <% :ignore -> %>
+          <%= inspect(@result) %>
+
+        <% {:ok, value} -> %>
+          <%= value %>
+      <% end %>
       """
     end
 

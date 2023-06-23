@@ -65,10 +65,8 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp select_allowed_fields(query, context) do
-      case Context.selectable_fields(context) do
-        :all -> query
-        fields -> select(query, ^fields)
-      end
+      fields = Context.selectable_fields(context)
+      select(query, ^fields)
     end
 
     defp filter_query(query, %Ast{predicates: predicates}, context) do

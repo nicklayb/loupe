@@ -40,7 +40,7 @@ defmodule Loupe.Language.Ast do
   alias Loupe.Language.Ast
 
   @typedoc "Range from one value to another"
-  @type range :: {integer(), integer()}
+  @type range :: {:range, {integer(), integer()}}
 
   @typedoc "Literial values usable in comparison"
   @type literal ::

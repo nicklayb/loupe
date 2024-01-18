@@ -205,11 +205,11 @@ if Code.ensure_loaded?(Ecto) do
     defp validate_binding(%Context{} = context, schema, [association | rest], accumulator) do
       atom_association = String.to_existing_atom(association)
 
-      with true <- schema_field_allowed?(context, schema, atom_association) do
+      if schema_field_allowed?(context, schema, atom_association) do
         queryable = through_association_queryable(schema, [atom_association])
         validate_binding(context, queryable, rest, [atom_association | accumulator])
       else
-        _ -> {:error, {:invalid_binding, association}}
+        {:error, {:invalid_binding, association}}
       end
     end
 

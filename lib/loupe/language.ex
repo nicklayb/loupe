@@ -10,7 +10,7 @@ defmodule Loupe.Language do
   @type compile_error :: ParserError.t() | LexerError.t()
 
   @doc "Compiles a query to AST"
-  @spec compile(String.t() | charlist()) :: {:ok, Ast.t()} | compile_error()
+  @spec compile(String.t() | charlist()) :: {:ok, Ast.t()} | {:error, compile_error()}
   def compile(string) when is_binary(string) do
     string
     |> String.to_charlist()

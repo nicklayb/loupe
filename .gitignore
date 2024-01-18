@@ -28,3 +28,5 @@ loupe-*.tar
 .elixir_ls
 
 database.db*
+
+src/*.erl

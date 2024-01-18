@@ -47,3 +47,5 @@ jobs:
       run: mix test
     - name: Run coverage
       run: mix coveralls.github
+    - name: Run Dialyzer
+      run: mix dialyzer

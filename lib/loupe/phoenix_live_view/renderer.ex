@@ -1,5 +1,8 @@
 if Code.ensure_loaded?(Phoenix.Component) do
   defmodule Loupe.PhoenixLiveView.Renderer do
+    @moduledoc """
+    Module that is meant to be implemented to control how the component renders
+    """
     @callback render_type(any(), Loupe.Ecto.Context.assigns()) :: :ignore | {:ok, any()}
     @callback struct_link(struct(), atom(), Loupe.Ecto.Context.assigns()) ::
                 String.t() | {String.t(), Keyword.t()} | nil

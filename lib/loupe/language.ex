@@ -18,14 +18,14 @@ defmodule Loupe.Language do
   end
 
   def compile(charlist) do
-    with {:ok, tokens, _} <- :lexer.string(charlist),
-         {:ok, ast} <- :parser.parse(tokens) do
+    with {:ok, tokens, _} <- :loupe_lexer.string(charlist),
+         {:ok, ast} <- :loupe_parser.parse(tokens) do
       {:ok, new_ast(ast)}
     else
-      {:error, {line, :parser, messages}} ->
+      {:error, {line, :loupe_parser, messages}} ->
         {:error, %ParserError{line: line, message: messages}}
 
-      {:error, {line, :lexer, messages}, _} ->
+      {:error, {line, :loupe_lexer, messages}, _} ->
         {:error, %LexerError{line: line, message: messages}}
     end
   rescue

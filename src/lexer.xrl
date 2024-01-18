@@ -31,7 +31,7 @@ As = as
 Empty = :empty
 
 Identifier  = [A-Za-z][A-Za-z0-9_]*
-PositiveInt = {NonZeroDigit}?{Digit}*
+PositiveInt = {NonZeroDigit}|{NonZeroDigit}?{Digit}+
 IntegerPart = {NegativeSign}?{PositiveInt}
 IntValue    = {IntegerPart}
 IntQuant    = {IntegerPart}{Quantifier}

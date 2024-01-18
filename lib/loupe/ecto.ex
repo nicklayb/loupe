@@ -11,9 +11,11 @@ if Code.ensure_loaded?(Ecto) do
 
     @root_binding :root
 
+    @type build_query_error :: any()
+
     @doc "Same as build_query/2 but with context or with implementation with no assigns"
     @spec build_query(Ast.t() | binary(), Context.implementation() | Context.t()) ::
-            {:ok, Ecto.Query.t(), Context.t()} | {:error, atom()}
+            {:ok, Ecto.Query.t(), Context.t()} | {:error, build_query_error()}
 
     def build_query(string_or_ast, implementation) when is_atom(implementation) do
       build_query(string_or_ast, implementation, %{})
@@ -30,7 +32,7 @@ if Code.ensure_loaded?(Ecto) do
     of the Loupe.Ecto.Definition behaviour and supports assigns as a third parameter.
     """
     @spec build_query(Ast.t() | binary(), Context.implementation(), map()) ::
-            {:ok, Ecto.Query.t(), Context.t()} | {:error, atom()}
+            {:ok, Ecto.Query.t(), Context.t()} | {:error, build_query_error()}
 
     def build_query(string_or_ast, implementation, assigns) do
       build_query(string_or_ast, Context.new(implementation, assigns))
@@ -65,10 +67,8 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp select_allowed_fields(query, context) do
-      case Context.selectable_fields(context) do
-        :all -> query
-        fields -> select(query, ^fields)
-      end
+      fields = Context.selectable_fields(context)
+      select(query, ^fields)
     end
 
     defp filter_query(query, %Ast{predicates: predicates}, context) do

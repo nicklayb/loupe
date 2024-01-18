@@ -66,7 +66,7 @@ defmodule Loupe.Language.Ast do
           | {operand(), binding(), literal()}
 
   @typedoc "Query quantifier to limit the query result count"
-  @type quantifier :: :all | {:int, integer()} | range()
+  @type quantifier :: :all | {:int, integer()} | {:range, range()}
 
   @typedoc "Reserved keywords"
   @type reserved_keyword :: :empty

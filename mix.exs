@@ -60,7 +60,8 @@ defmodule Loupe.MixProject do
       {:ecto_sqlite3, "~> 0.9.1", only: [:dev, :test]},
       {:credo, "~> 1.6.7", only: [:dev, :test]},
       {:excoveralls, "~> 0.16", only: :test},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 

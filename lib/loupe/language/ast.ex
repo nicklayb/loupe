@@ -84,11 +84,11 @@ defmodule Loupe.Language.Ast do
   @literals ~w(string int float)a
   @reserved_keywords ~w(empty)a
 
-  defguard is_operand(operand) when operand in @operands
-  defguard is_text_operand(operand) when operand in @text_operands
-  defguard is_boolean_operator(boolean_operator) when boolean_operator in @boolean_operators
-  defguard is_literal(literal) when literal in @literals
-  defguard is_reserved_keyword(reserved_keyword) when reserved_keyword in @reserved_keywords
+  defguardp is_operand(operand) when operand in @operands
+  defguardp is_text_operand(operand) when operand in @text_operands
+  defguardp is_boolean_operator(boolean_operator) when boolean_operator in @boolean_operators
+  defguardp is_literal(literal) when literal in @literals
+  defguardp is_reserved_keyword(reserved_keyword) when reserved_keyword in @reserved_keywords
 
   @doc "Instanciates the AST"
   @spec new(alpha_identifier(), alpha_identifier(), quantifier(), predicate()) :: t()

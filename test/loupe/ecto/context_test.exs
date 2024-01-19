@@ -135,4 +135,20 @@ defmodule Loupe.Ecto.ContextTest do
       assert [{[:posts], :a1}, {[:posts, :comments], :a0}] = Context.sorted_bindings(context)
     end
   end
+
+  describe "initialize_query/1" do
+    setup [:create_context, :with_root_schema]
+
+    @tag assigns: %{ordered_by_id: true}
+    test "initializes a query through scope_schema/2", %{
+      context: %Context{root_schema: root_schema} = context
+    } do
+      assert %Ecto.Query{} = Context.initialize_query(context)
+
+      assert root_schema ==
+               context
+               |> update_assigns(%{})
+               |> Context.initialize_query()
+    end
+  end
 end

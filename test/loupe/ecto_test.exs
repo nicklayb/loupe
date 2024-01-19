@@ -19,6 +19,33 @@ defmodule Loupe.EctoTest do
   ]
 
   describe "build_query/1" do
+    test "builds query from string without assigns" do
+      assert [
+               %User{email: "user@email.com"}
+             ] = run_query(~s|get all User where email = "user@email.com"|, nil)
+    end
+
+    test "builds query with raw ast" do
+      assert {:ok, ast} = Loupe.Language.compile(~s|get all User where email = "user@email.com"|)
+
+      assert [
+               %User{email: "user@email.com"}
+             ] = run_query(ast)
+    end
+
+    test "builds query joining multiple time the same binding" do
+      assert [
+               %User{email: "another_user@email.com"}
+             ] =
+               run_query("""
+               get all User 
+               where (
+                 posts.title like "post"
+                 and posts.score > 0.5
+               )
+               """)
+    end
+
     test "builds query joining binding and applying predicates from string" do
       assert [
                %User{email: "user@email.com"}
@@ -30,6 +57,58 @@ defmodule Loupe.EctoTest do
                  and role.slug = "admin"
                )
                """)
+    end
+
+    test "builds query with integer quantifier" do
+      assert [%User{email: "user@email.com"}] =
+               run_query(~s(get 1 User where email not :empty), %{
+                 role: "admin",
+                 ordered_by_id: true
+               })
+
+      assert [%User{email: "user@email.com"}, %User{email: "something@gmail.com"}] =
+               run_query(~s(get 2 User where email not :empty), %{
+                 role: "admin",
+                 ordered_by_id: true
+               })
+    end
+
+    test "builds query with range quantifier" do
+      assert [%User{email: "user@email.com"}] =
+               run_query(~s(get 0..1 User where email not :empty), %{
+                 role: "admin",
+                 ordered_by_id: true
+               })
+
+      assert [%User{email: "something@gmail.com"}] =
+               run_query(~s(get 1..2 User where email not :empty), %{
+                 role: "admin",
+                 ordered_by_id: true
+               })
+
+      assert [%User{email: "something@gmail.com"}, %User{email: "another_user@email.com"}] =
+               run_query(~s(get 1..3 User where email not :empty), %{
+                 role: "admin",
+                 ordered_by_id: true
+               })
+    end
+
+    test "queries using and operator" do
+      assert [
+               %User{email: "another_user@email.com"}
+             ] = run_query(~s|get all User where age > 18 and age < 30|)
+    end
+
+    test "queries float" do
+      assert [
+               %Post{score: 1.5}
+             ] = run_query(~s|get all Post where score > 0.5|)
+    end
+
+    test "queries using or operator" do
+      assert results = run_query(~s|get all User where age < 20 or age > 29|)
+      assert Enum.any?(results, &match?(%User{email: "something@gmail.com"}, &1))
+      assert Enum.any?(results, &match?(%User{email: "user@email.com"}, &1))
     end
 
     test "queries using thruty operator" do
@@ -188,7 +267,8 @@ defmodule Loupe.EctoTest do
       age: 21,
       posts: [
         %Post{
-          title: "My amzing post",
+          title: "My amazing post",
+          score: 1.5,
           comments: [
             %Comment{text: "That's a comment"}
           ]
@@ -200,12 +280,20 @@ defmodule Loupe.EctoTest do
   end
 
   defp run_query(query, assigns \\ %{role: "admin"}) do
-    assert {:ok, %Ecto.Query{} = ecto_query, _context} =
-             LoupeEcto.build_query(
-               query,
-               @implementation,
-               assigns
-             )
+    result =
+      case assigns do
+        nil ->
+          LoupeEcto.build_query(query, @implementation)
+
+        _ ->
+          LoupeEcto.build_query(
+            query,
+            @implementation,
+            assigns
+          )
+      end
+
+    assert {:ok, %Ecto.Query{} = ecto_query, _context} = result
 
     Repo.all(ecto_query)
   end

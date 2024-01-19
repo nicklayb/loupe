@@ -1,6 +1,6 @@
 Terminals
-get where all positive_integer identifier dot boolean_operator
-list_operand like comma operand string integer range
+where all identifier dot boolean_operator
+list_operand like comma operand string integer
 negate open_paren close_paren float open_bracket close_bracket
 empty.
 
@@ -13,8 +13,8 @@ expression -> identifier quantifier identifier where predicates : {unwrap('$1'),
 expression -> identifier identifier where predicates : {unwrap('$1'), {int, 1}, unwrap('$2'), '$4'}.
 
 quantifier -> all : all.
-quantifier -> positive_integer : {int, unwrap('$1')}.
-quantifier -> range : {range, unwrap('$1')}.
+quantifier -> integer dot dot integer : {range, {unwrap('$1'), unwrap('$4')}}.
+quantifier -> integer : {int, unwrap('$1')}.
 
 predicates -> open_paren predicates close_paren boolean_operator predicates : {unwrap('$4'), '$2', '$5'}.
 predicates -> open_paren predicates close_paren : '$2'.
@@ -42,7 +42,6 @@ binding -> identifier : [unwrap('$1')].
 
 literal -> string_literal : '$1'.
 literal -> integer : {int, unwrap('$1')}.
-literal -> positive_integer : {int, unwrap('$1')}.
 literal -> float : {float, unwrap('$1')}.
 
 string_literal -> string : {string, unwrap('$1')}.

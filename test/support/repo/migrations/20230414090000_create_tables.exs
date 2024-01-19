@@ -17,6 +17,7 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
     create(table("posts")) do
       add(:title, :string)
       add(:body, :string)
+      add(:score, :float)
       add(:user_id, references("users"))
     end
 

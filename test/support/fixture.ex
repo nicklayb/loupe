@@ -38,6 +38,10 @@ defmodule Loupe.Fixture do
     :ok
   end
 
+  def update_assigns(%Context{} = context, assigns) do
+    %Context{context | assigns: assigns}
+  end
+
   def sigil_L(query, _) do
     {:ok, %Ast{} = ast} = Language.compile(query)
 

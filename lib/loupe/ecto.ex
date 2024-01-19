@@ -57,8 +57,9 @@ if Code.ensure_loaded?(Ecto) do
       Context.put_root_schema(context, schema)
     end
 
-    defp to_query(%Ast{} = ast, %Context{root_schema: root_schema} = context) do
-      root_schema
+    defp to_query(%Ast{} = ast, %Context{} = context) do
+      context
+      |> Context.initialize_query()
       |> from(as: ^@root_binding)
       |> limit_query(ast)
       |> join_relation(context)

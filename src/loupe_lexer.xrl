@@ -22,7 +22,6 @@ ListOperand = in
 LikeOperand = like
 Not = not
 Dot = \.
-Colon = :
 All = all
 Get = get
 Where = where

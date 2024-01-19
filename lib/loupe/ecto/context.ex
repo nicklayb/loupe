@@ -146,6 +146,16 @@ if Code.ensure_loaded?(Ecto) do
       |> Enum.sort_by(fn {binding_path, _} -> length(binding_path) end)
     end
 
+    @doc "Initializes a query by scoping from the implementation"
+    @spec initialize_query(t()) :: Ecto.Query.t()
+    def initialize_query(%Context{
+          implementation: implementation,
+          root_schema: root_schema,
+          assigns: assigns
+        }) do
+      implementation.scope_schema(root_schema, assigns)
+    end
+
     @doc """
     Puts bindings in the context validation that bindings are either
     valid fields or associations.

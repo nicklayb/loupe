@@ -29,6 +29,7 @@ defmodule Loupe.Test.Ecto do
       field(:title, :string)
       field(:body, :string)
       field(:user_id, :integer)
+      field(:score, :float)
 
       has_many(:comments, Comment)
     end
@@ -85,6 +86,8 @@ defmodule Loupe.Test.Ecto do
     @moduledoc """
     Example Ecto definition for the modules defined above.
     """
+
+    import Ecto.Query
     @behaviour Loupe.Ecto.Definition
 
     @schemas %{
@@ -107,6 +110,7 @@ defmodule Loupe.Test.Ecto do
     def schema_fields(_, _), do: :all
 
     @impl Loupe.Ecto.Definition
+    def scope_schema(schema, %{ordered_by_id: true}), do: order_by(schema, :id)
     def scope_schema(schema, _), do: schema
   end
 end

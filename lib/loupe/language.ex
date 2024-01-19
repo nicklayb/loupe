@@ -28,9 +28,6 @@ defmodule Loupe.Language do
       {:error, {line, :loupe_lexer, messages}, _} ->
         {:error, %LexerError{line: line, message: messages}}
     end
-  rescue
-    error ->
-      {:error, error}
   end
 
   defp new_ast({action, quantifier, schema, predicates}) do

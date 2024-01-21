@@ -47,6 +47,7 @@ defmodule Loupe.Language.Ast do
           {:float, float()}
           | {:int, integer()}
           | {:string, binary()}
+          | {:sigil, binary()}
 
   @typedoc "Alpha identifier"
   @type alpha_identifier :: charlist()
@@ -125,6 +126,10 @@ defmodule Loupe.Language.Ast do
 
   defp walk_predicates({:string, value}) do
     {:string, to_string(value)}
+  end
+
+  defp walk_predicates({:sigil, {char, value}}) do
+    {:sigil, {char, to_string(value)}}
   end
 
   defp walk_predicates(boolean) when is_boolean(boolean) do

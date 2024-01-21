@@ -62,6 +62,7 @@ defmodule Loupe.Test.Ecto do
       field(:email, :string)
       field(:age, :integer)
       field(:active, :boolean)
+      field(:bank_account, :integer)
 
       has_many(:posts, Post)
       has_many(:user_external_keys, Module.concat(["Loupe", "Test", "Ecto", "UserExternalKey"]))
@@ -112,5 +113,15 @@ defmodule Loupe.Test.Ecto do
     @impl Loupe.Ecto.Definition
     def scope_schema(schema, %{ordered_by_id: true}), do: order_by(schema, :id)
     def scope_schema(schema, _), do: schema
+
+    @impl Loupe.Ecto.Definition
+    def cast_sigil('m', money_string, _) do
+      money_string
+      |> String.to_float()
+      |> then(&(&1 * 100))
+      |> ceil()
+    end
+
+    def cast_sigil(_, string, _), do: string
   end
 end

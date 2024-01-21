@@ -2,7 +2,7 @@ Terminals
 where all identifier dot boolean_operator
 list_operand like comma operand string integer
 negate open_paren close_paren float open_bracket close_bracket
-empty.
+empty sigil.
 
 Nonterminals
 quantifier predicates predicate expression binding literal list inner_list string_literal.
@@ -43,6 +43,7 @@ binding -> identifier : [unwrap('$1')].
 literal -> string_literal : '$1'.
 literal -> integer : {int, unwrap('$1')}.
 literal -> float : {float, unwrap('$1')}.
+literal -> sigil : {sigil, unwrap('$1')}.
 
 string_literal -> string : {string, unwrap('$1')}.
 

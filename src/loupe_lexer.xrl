@@ -15,6 +15,7 @@ OpenBracket = \[
 CloseBracket = \]
 Arrow = \=>
 String = "([^"\\]*(\\.[^"\\]*)*)"
+Sigil = ~[a-zA-Z]"([^"\\]*(\\.[^"\\]*)*)"
 Quantifier = [kmKM]
 BoolOp = and|or
 Operand = !=|>|<|>=|<=|=
@@ -25,17 +26,14 @@ Dot = \.
 All = all
 Get = get
 Where = where
-As = as
 Empty = :empty
 
 Identifier        = [A-Za-z][A-Za-z0-9_]*
 FractionalPart    = \.{Digit}+
 FloatRationalPart = {NegativeSign}?{Digit}+
 FloatValue        = {FloatRationalPart}{FractionalPart}
-PositiveInt       = {NonZeroDigit}{Digit}+|{Digit}
-IntegerPart       = {NegativeSign}{Digit}+|{PositiveInt}
-IntValue          = {IntegerPart}
-IntQuant          = {IntegerPart}{Quantifier}
+Integer           = {NegativeSign}?{Digit}+
+IntQuant          = {Integer}{Quantifier}
 
 Rules.
 
@@ -43,12 +41,12 @@ Rules.
 {Terminator}    : skip_token.
 {Comma}         : {token, {comma,             TokenLine, list_to_atom(TokenChars)}}.
 {All}           : {token, {all,               TokenLine, list_to_atom(TokenChars)}}.
-{As}            : {token, {as,                TokenLine, list_to_atom(TokenChars)}}.
 {Where}         : {token, {where,             TokenLine, list_to_atom(TokenChars)}}.
 {Empty}         : {token, {empty,             TokenLine, list_to_atom(TokenChars)}}.
-{IntValue}      : {token, {integer,           TokenLine, list_to_integer(TokenChars)}}.
 {IntQuant}      : {token, {integer,           TokenLine, quantify_integer(TokenChars)}}.
+{Integer}       : {token, {integer,           TokenLine, list_to_integer(TokenChars)}}.
 {FloatValue}    : {token, {float,             TokenLine, list_to_float(TokenChars)}}.
+{Sigil}         : {token, {sigil,             TokenLine, extract_sigil(TokenChars)}}.
 {String}        : {token, {string,            TokenLine, string:trim(TokenChars, both, "\"")}}.
 {BoolOp}        : {token, {boolean_operator,  TokenLine, list_to_atom(TokenChars)}}.
 {Operand}       : {token, {operand,           TokenLine, list_to_atom(TokenChars)}}.
@@ -75,3 +73,7 @@ quantify_integer(Chars) ->
       Value * 1000000
   end.
 
+extract_sigil(Chars) ->
+  {match, [Char, String]} = re:run(Chars, "^~(.)(.*)$", [{capture,all_but_first,list}]),
+  Unwrapped = string:trim(String, both, "\""),
+  {Char, Unwrapped}.

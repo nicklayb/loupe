@@ -106,9 +106,14 @@ defmodule Loupe.EctoTest do
     end
 
     test "queries using or operator" do
-      assert results = run_query(~s|get all User where age < 20 or age > 29|)
+      assert [_, _] = results = run_query(~s|get all User where age < 20 or age > 29|)
       assert Enum.any?(results, &match?(%User{email: "something@gmail.com"}, &1))
       assert Enum.any?(results, &match?(%User{email: "user@email.com"}, &1))
+    end
+
+    test "queries using sigil" do
+      assert [%User{bank_account: 400_000}] =
+               run_query(~s|get all User where bank_account > ~m"400.00"|)
     end
 
     test "queries using thruty operator" do
@@ -232,6 +237,7 @@ defmodule Loupe.EctoTest do
       role: %Role{slug: "admin"},
       email: "user@email.com",
       name: "Jane Doe",
+      bank_account: 1_000,
       age: 18,
       posts: [
         %Post{
@@ -253,6 +259,7 @@ defmodule Loupe.EctoTest do
       active: true,
       name: "John Doe",
       email: "something@gmail.com",
+      bank_account: 400_000,
       role: %Role{slug: "user"},
       user_external_keys: [
         %UserExternalKey{
@@ -264,6 +271,7 @@ defmodule Loupe.EctoTest do
     Repo.insert!(%User{
       role: %Role{slug: "admin"},
       email: "another_user@email.com",
+      bank_account: 10_000,
       age: 21,
       posts: [
         %Post{

@@ -156,6 +156,12 @@ if Code.ensure_loaded?(Ecto) do
       implementation.scope_schema(root_schema, assigns)
     end
 
+    @doc "Casts a sigil expression using the context's implementation"
+    @spec cast_sigil(t(), Loupe.Language.sigil_definition()) :: any()
+    def cast_sigil(%Context{implementation: implementation, assigns: assigns}, {char, string}) do
+      implementation.cast_sigil(char, string, assigns)
+    end
+
     @doc """
     Puts bindings in the context validation that bindings are either
     valid fields or associations.

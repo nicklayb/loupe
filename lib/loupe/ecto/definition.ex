@@ -42,5 +42,8 @@ if Code.ensure_loaded?(Ecto) do
 
     @doc "Scopes schema query builder"
     @callback scope_schema(Context.schema(), Context.assigns()) :: Ecto.Queryable.t()
+
+    @doc "Casts a sigil to another literal"
+    @callback cast_sigil(char(), binary(), Context.assigns()) :: any()
   end
 end

@@ -10,6 +10,7 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
       add(:name, :string)
       add(:email, :string)
       add(:age, :integer)
+      add(:bank_account, :integer)
       add(:active, :boolean, default: false)
       add(:role_id, references("roles"))
     end

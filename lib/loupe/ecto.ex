@@ -94,61 +94,61 @@ if Code.ensure_loaded?(Ecto) do
 
     defp apply_filter({:not, {operand, binding, value}}, context) do
       binding_path = binding_field(binding, context)
-      apply_bounded_filter({:not, {operand, binding_path, value}})
+      apply_bounded_filter({:not, {operand, binding_path, value}}, context)
     end
 
     defp apply_filter({operand, binding, value}, context) do
       binding_path = binding_field(binding, context)
-      apply_bounded_filter({operand, binding_path, value})
+      apply_bounded_filter({operand, binding_path, value}, context)
     end
 
-    defp apply_bounded_filter({:!=, {binding_name, field}, value}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) != ^unwrap(value))
+    defp apply_bounded_filter({:!=, {binding_name, field}, value}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) != ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:not, {:=, {binding_name, field}, :empty}}) do
+    defp apply_bounded_filter({:not, {:=, {binding_name, field}, :empty}}, context) do
       dynamic([{^binding_name, binding}], not is_nil(field(binding, ^field)))
     end
 
-    defp apply_bounded_filter({:=, {binding_name, field}, :empty}) do
+    defp apply_bounded_filter({:=, {binding_name, field}, :empty}, context) do
       dynamic([{^binding_name, binding}], is_nil(field(binding, ^field)))
     end
 
-    defp apply_bounded_filter({:=, {binding_name, field}, value}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) == ^unwrap(value))
+    defp apply_bounded_filter({:=, {binding_name, field}, value}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) == ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:>, {binding_name, field}, value}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) > ^unwrap(value))
+    defp apply_bounded_filter({:>, {binding_name, field}, value}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) > ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:<, {binding_name, field}, value}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) < ^unwrap(value))
+    defp apply_bounded_filter({:<, {binding_name, field}, value}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) < ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:>=, {binding_name, field}, value}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) >= ^unwrap(value))
+    defp apply_bounded_filter({:>=, {binding_name, field}, value}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) >= ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:<=, {binding_name, field}, value}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) <= ^unwrap(value))
+    defp apply_bounded_filter({:<=, {binding_name, field}, value}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) <= ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:in, {binding_name, field}, value}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) in ^unwrap(value))
+    defp apply_bounded_filter({:in, {binding_name, field}, value}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) in ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:not, {:in, {binding_name, field}, value}}) do
-      dynamic([{^binding_name, binding}], field(binding, ^field) not in ^unwrap(value))
+    defp apply_bounded_filter({:not, {:in, {binding_name, field}, value}}, context) do
+      dynamic([{^binding_name, binding}], field(binding, ^field) not in ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:not, {:like, {binding_name, field}, value}}) do
-      like_value = "%#{unwrap(value)}%"
+    defp apply_bounded_filter({:not, {:like, {binding_name, field}, value}}, context) do
+      like_value = "%#{unwrap(value, context)}%"
       dynamic([{^binding_name, binding}], not like(field(binding, ^field), ^like_value))
     end
 
-    defp apply_bounded_filter({:like, {binding_name, field}, value}) do
-      like_value = "%#{unwrap(value)}%"
+    defp apply_bounded_filter({:like, {binding_name, field}, value}, context) do
+      like_value = "%#{unwrap(value, context)}%"
       dynamic([{^binding_name, binding}], like(field(binding, ^field), ^like_value))
     end
 
@@ -167,11 +167,15 @@ if Code.ensure_loaded?(Ecto) do
       {Map.fetch!(bindings, binding), String.to_existing_atom(field)}
     end
 
-    defp unwrap({:string, string}), do: string
-    defp unwrap({:int, int}), do: int
-    defp unwrap({:float, float}), do: float
-    defp unwrap({:list, list}), do: Enum.map(list, &unwrap/1)
-    defp unwrap(boolean) when is_boolean(boolean), do: boolean
+    defp unwrap({:sigil, string}, context) do
+      Context.cast_sigil(context, string)
+    end
+
+    defp unwrap({:string, string}, _context), do: string
+    defp unwrap({:int, int}, _context), do: int
+    defp unwrap({:float, float}, _context), do: float
+    defp unwrap({:list, list}, context), do: Enum.map(list, &unwrap(&1, context))
+    defp unwrap(boolean, _context) when is_boolean(boolean), do: boolean
 
     defp join_relation(query, %Context{bindings: bindings} = context) do
       context

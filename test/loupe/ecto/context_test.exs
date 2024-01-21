@@ -106,7 +106,8 @@ defmodule Loupe.Ecto.ContextTest do
     ]
 
     test "gets selectable fields", %{context: context} do
-      assert [:id, :name, :email, :age, :active, :role_id] = Context.selectable_fields(context)
+      assert [:id, :name, :email, :age, :active, :bank_account, :role_id] =
+               Context.selectable_fields(context)
     end
   end
 
@@ -117,7 +118,7 @@ defmodule Loupe.Ecto.ContextTest do
     ]
 
     test "gets selectable fields", %{context: context} do
-      assert [:id, :name, :email, :age, :active, :role_id] =
+      assert [:id, :name, :email, :age, :active, :bank_account, :role_id] =
                Context.selectable_fields(context, User)
     end
   end
@@ -149,6 +150,15 @@ defmodule Loupe.Ecto.ContextTest do
                context
                |> update_assigns(%{})
                |> Context.initialize_query()
+    end
+  end
+
+  describe "cast_sigil/3" do
+    setup [:create_context, :with_root_schema]
+
+    test "casts sigil using the implementation", %{context: context} do
+      assert 40_000 = Context.cast_sigil(context, {'m', "400.00"})
+      assert "other" = Context.cast_sigil(context, {'o', "other"})
     end
   end
 end

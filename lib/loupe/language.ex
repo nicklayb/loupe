@@ -8,6 +8,7 @@ defmodule Loupe.Language do
   alias Loupe.Errors.ParserError
 
   @type compile_error :: ParserError.t() | LexerError.t()
+  @type sigil_definition :: {char(), binary()}
 
   @doc "Compiles a query to AST"
   @spec compile(String.t() | charlist()) :: {:ok, Ast.t()} | {:error, compile_error()}

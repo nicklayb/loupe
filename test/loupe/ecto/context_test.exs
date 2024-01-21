@@ -152,4 +152,13 @@ defmodule Loupe.Ecto.ContextTest do
                |> Context.initialize_query()
     end
   end
+
+  describe "cast_sigil/3" do
+    setup [:create_context, :with_root_schema]
+
+    test "casts sigil using the implementation", %{context: context} do
+      assert 40_000 = Context.cast_sigil(context, {'m', "400.00"})
+      assert "other" = Context.cast_sigil(context, {'o', "other"})
+    end
+  end
 end

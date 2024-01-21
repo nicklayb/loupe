@@ -106,11 +106,11 @@ if Code.ensure_loaded?(Ecto) do
       dynamic([{^binding_name, binding}], field(binding, ^field) != ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:not, {:=, {binding_name, field}, :empty}}, context) do
+    defp apply_bounded_filter({:not, {:=, {binding_name, field}, :empty}}, _context) do
       dynamic([{^binding_name, binding}], not is_nil(field(binding, ^field)))
     end
 
-    defp apply_bounded_filter({:=, {binding_name, field}, :empty}, context) do
+    defp apply_bounded_filter({:=, {binding_name, field}, :empty}, _context) do
       dynamic([{^binding_name, binding}], is_nil(field(binding, ^field)))
     end
 

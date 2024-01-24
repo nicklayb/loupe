@@ -33,6 +33,20 @@ defmodule Loupe.EctoTest do
              ] = run_query(ast)
     end
 
+    test "builds query without where" do
+      assert [
+               %User{email: "user@email.com"}
+             ] = run_query(~s|get User|)
+    end
+
+    test "builds query with quantifier without where" do
+      assert [
+               %User{email: "user@email.com"},
+               %User{email: "something@gmail.com"},
+               %User{email: "another_user@email.com"}
+             ] = run_query(~s|get all User|)
+    end
+
     test "builds query joining multiple time the same binding" do
       assert [
                %User{email: "another_user@email.com"}

@@ -11,6 +11,8 @@ Rootsymbol expression.
 
 expression -> identifier quantifier identifier where predicates : {unwrap('$1'), '$2', unwrap('$3'), '$5'}.
 expression -> identifier identifier where predicates : {unwrap('$1'), {int, 1}, unwrap('$2'), '$4'}.
+expression -> identifier quantifier identifier : {unwrap('$1'), '$2', unwrap('$3'), nil}.
+expression -> identifier identifier : {unwrap('$1'), {int, 1}, unwrap('$2'), nil}.
 
 quantifier -> all : all.
 quantifier -> integer dot dot integer : {range, {unwrap('$1'), unwrap('$4')}}.

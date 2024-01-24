@@ -103,8 +103,7 @@ defmodule Loupe.LanguageTest do
 
     @case ~s|get User where age not :empty|
     test "supports not :empty keyword" do
-      assert {:ok, %Ast{predicates: {:not, {:=, {:binding, ["age"]}, :empty}}}} =
-               Language.compile(@case)
+      assert {:ok, %Ast{predicates: {:!=, {:binding, ["age"]}, :empty}}} = Language.compile(@case)
     end
 
     @case ~s|get User where email like "something"|

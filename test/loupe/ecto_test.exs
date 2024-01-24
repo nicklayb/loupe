@@ -14,8 +14,8 @@ defmodule Loupe.EctoTest do
 
   setup_all [
     :start_repo,
-    :setup_entities,
-    :checkout_repo
+    :checkout_repo,
+    :setup_entities
   ]
 
   describe "build_query/1" do

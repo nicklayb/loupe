@@ -32,7 +32,7 @@ predicate -> binding negate like string_literal : {unwrap('$2'), {unwrap('$3'), 
 predicate -> binding like string_literal : {unwrap('$2'), {binding, '$1'}, '$3'}.
 
 predicate -> binding empty : {'=', {binding, '$1'}, empty}.
-predicate -> binding negate empty : {unwrap('$2'), {'=', {binding, '$1'}, empty}}.
+predicate -> binding negate empty : {'!=', {binding, '$1'}, empty}.
 
 predicate -> binding : {'=', {binding, '$1'}, true}.
 predicate -> negate binding : {'=', {binding, '$2'}, false}.

@@ -45,5 +45,11 @@ if Code.ensure_loaded?(Ecto) do
 
     @doc "Casts a sigil to another literal"
     @callback cast_sigil(char(), binary(), Context.assigns()) :: any()
+
+    @doc "Applies a given filter expression"
+    @callback apply_filter(Loupe.Language.Ast.predicate(), Context.assigns()) ::
+                :continue | Ecto.Query.t()
+
+    @optional_callbacks [cast_sigil: 3, apply_filter: 2]
   end
 end

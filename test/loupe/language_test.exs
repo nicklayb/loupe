@@ -91,6 +91,16 @@ defmodule Loupe.LanguageTest do
       assert {:ok, %Ast{predicates: {:=, {:binding, ["age"]}, :empty}}} = Language.compile(@case)
     end
 
+    @case ~s|get User|
+    test "supports queries without where" do
+      assert {:ok, %Ast{predicates: nil}} = Language.compile(@case)
+    end
+
+    @case ~s|get all User|
+    test "supports queries without where and quantifier" do
+      assert {:ok, %Ast{predicates: nil}} = Language.compile(@case)
+    end
+
     @case ~s|get User where age|
     test "supports thruty expression" do
       assert {:ok, %Ast{predicates: {:=, {:binding, ["age"]}, true}}} = Language.compile(@case)

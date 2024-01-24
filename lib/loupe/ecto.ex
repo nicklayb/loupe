@@ -72,6 +72,10 @@ if Code.ensure_loaded?(Ecto) do
       select(query, ^fields)
     end
 
+    defp filter_query(query, %Ast{predicates: nil}, _) do
+      query
+    end
+
     defp filter_query(query, %Ast{predicates: predicates}, context) do
       conditions = apply_filter(predicates, context)
 

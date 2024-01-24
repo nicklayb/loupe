@@ -65,6 +65,7 @@ defmodule Loupe.Language.Ast do
   @type predicate ::
           {boolean_operator(), predicate(), predicate()}
           | {operand(), binding(), literal()}
+          | nil
 
   @typedoc "Query quantifier to limit the query result count"
   @type quantifier :: :all | {:int, integer()} | {:range, range()}
@@ -101,6 +102,8 @@ defmodule Loupe.Language.Ast do
       schema: to_string(binding)
     }
   end
+
+  defp walk_predicates(nil), do: nil
 
   defp walk_predicates({:not, expression}) do
     {:not, walk_predicates(expression)}

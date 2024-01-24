@@ -2,11 +2,12 @@ defmodule Loupe.MixProject do
   use Mix.Project
 
   @github "https://github.com/nicklayb/loupe"
+  @version "0.6.3"
 
   def project do
     [
       app: :loupe,
-      version: "0.6.2",
+      version: @version,
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,

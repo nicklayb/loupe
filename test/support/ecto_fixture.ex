@@ -1,14 +1,6 @@
 defmodule Loupe.Test.Ecto do
   @moduledoc "Mock schemas and Ecto modules for tests"
 
-  defmodule Repo do
-    @moduledoc "Mocked repo"
-
-    use Ecto.Repo,
-      otp_app: :loupe,
-      adapter: Ecto.Adapters.SQLite3
-  end
-
   defmodule Comment do
     @moduledoc "Comment schema"
     use Ecto.Schema

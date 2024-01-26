@@ -3,7 +3,7 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
 
   def change do
     create(table("roles")) do
-      add(:slug, :email)
+      add(:slug, :string)
     end
 
     create(table("users")) do

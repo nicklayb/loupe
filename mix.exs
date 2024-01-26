@@ -58,11 +58,11 @@ defmodule Loupe.MixProject do
       {:phoenix_live_view, "~> 0.18", optional: true},
       {:ecto, "~> 3.0", optional: true},
       {:ecto_sql, "~> 3.0", optional: true},
-      {:ecto_sqlite3, "~> 0.9.1", only: [:dev, :test]},
       {:credo, "~> 1.6.7", only: [:dev, :test]},
       {:excoveralls, "~> 0.16", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:postgrex, ">= 0.0.0"}
     ]
   end
 

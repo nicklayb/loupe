@@ -1,12 +1,63 @@
 defmodule Loupe.Test.Ecto do
   @moduledoc "Mock schemas and Ecto modules for tests"
 
+  defmodule Money do
+    defstruct [:amount, :currency]
+    use Ecto.Type
+
+    def type, do: :money
+
+    def cast(float) when is_float(float) do
+      {:ok, new(ceil(float * 100))}
+    end
+
+    def cast(integer) when is_integer(integer) do
+      {:ok, new(integer)}
+    end
+
+    def cast(string) when is_binary(string) do
+      with {:ok, dollars} <- parse(string),
+           {float, ""} <- Float.parse(dollars) do
+        {:ok, new(float * 100)}
+      end
+    end
+
+    def cast(%Money{} = money), do: {:ok, money}
+
+    def cast(_), do: :error
+
+    def load({amount, currency}), do: {:ok, new(amount, currency)}
+
+    def dump(%Money{amount: amount, currency: currency}) do
+      {amount, to_string(currency)}
+    end
+
+    def dump(_), do: :error
+
+    defp new(amount, currency \\ :cad) do
+      %Money{amount: amount, currency: currency}
+    end
+
+    defp parse(string) do
+      case Regex.scan(~r/([0-9]+(\.[0-9]+)?\$?)/, string) do
+        [[_, dollars]] ->
+          {:ok, dollars}
+
+        [[_, dollars_and_cents, _]] ->
+          {:ok, dollars_and_cents}
+
+        _ ->
+          :error
+      end
+    end
+  end
+
   defmodule Repo do
     @moduledoc "Mocked repo"
 
     use Ecto.Repo,
       otp_app: :loupe,
-      adapter: Ecto.Adapters.SQLite3
+      adapter: Ecto.Adapters.Postgres
   end
 
   defmodule Comment do
@@ -30,6 +81,7 @@ defmodule Loupe.Test.Ecto do
       field(:body, :string)
       field(:user_id, :integer)
       field(:score, :float)
+      field(:price, Money)
 
       has_many(:comments, Comment)
     end

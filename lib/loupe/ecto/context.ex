@@ -28,7 +28,7 @@ if Code.ensure_loaded?(Ecto) do
     set that you can find a the bottom of this file under the `@binding_keys` module
     attribute.
     """
-    defstruct [:assigns, :implementation, :root_schema, bindings: %{}]
+    defstruct [:assigns, :implementation, :root_schema, bindings: %{}, binding_types: %{}]
 
     alias Loupe.Ecto.Context
 
@@ -38,12 +38,14 @@ if Code.ensure_loaded?(Ecto) do
     @type implementation :: module()
     @type binding_path :: [atom()]
     @type bindings :: %{binding_path() => atom()}
+    @type binding_types :: %{binding_path() => atom()}
 
     @type t :: %Context{
             assigns: assigns(),
             implementation: implementation(),
             root_schema: schema(),
-            bindings: bindings()
+            bindings: bindings(),
+            binding_types: binding_types()
           }
 
     @doc """
@@ -159,7 +161,21 @@ if Code.ensure_loaded?(Ecto) do
     @doc "Casts a sigil expression using the context's implementation"
     @spec cast_sigil(t(), Loupe.Language.sigil_definition()) :: any()
     def cast_sigil(%Context{implementation: implementation, assigns: assigns}, {char, string}) do
-      implementation.cast_sigil(char, string, assigns)
+      if function_exported?(implementation, :cast_sigil, 3) do
+        implementation.cast_sigil(char, string, assigns)
+      else
+        string
+      end
+    end
+
+    @doc "Applies filter on expression through implementation"
+    @spec apply_filter(t(), tuple()) :: :continue | Ecto.Query.t()
+    def apply_filter(%Context{implementation: implementation, assigns: assigns}, expression) do
+      if function_exported?(implementation, :apply_filter, 2) do
+        implementation.apply_filter(expression, assigns)
+      else
+        :continue
+      end
     end
 
     @doc """
@@ -170,8 +186,13 @@ if Code.ensure_loaded?(Ecto) do
     def put_bindings(%Context{root_schema: root_schema} = context, bindings) do
       Enum.reduce_while(bindings, {:ok, context}, fn binding, {:ok, accumulator} ->
         case validate_binding(accumulator, root_schema, binding, []) do
-          {:ok, atom_binding} ->
-            {:cont, {:ok, put_binding(accumulator, atom_binding)}}
+          {:ok, binding_path, atom_binding, binding_type} ->
+            accumulator =
+              accumulator
+              |> put_binding(binding_path)
+              |> put_binding_type(binding_path ++ [atom_binding], binding_type)
+
+            {:cont, {:ok, accumulator}}
 
           {:error, _} = error ->
             {:halt, error}
@@ -198,6 +219,10 @@ if Code.ensure_loaded?(Ecto) do
 
     defp put_binding(%Context{} = context, _), do: context
 
+    defp put_binding_type(%Context{binding_types: binding_types} = context, binding_path, type) do
+      %Context{context | binding_types: Map.put(binding_types, binding_path, type)}
+    end
+
     defp unzip_binding(binding), do: unzip_binding(binding, {[], []})
 
     defp unzip_binding([left | rest], {current, all}) do
@@ -212,7 +237,8 @@ if Code.ensure_loaded?(Ecto) do
 
       with true <- atom_binding in schema.__schema__(:fields),
            true <- schema_field_allowed?(context, schema, atom_binding) do
-        {:ok, accumulator}
+        type = schema.__schema__(:type, atom_binding)
+        {:ok, accumulator, atom_binding, type}
       else
         _ -> {:error, {:invalid_binding, binding}}
       end

@@ -127,3 +127,5 @@ Here are some things that I would like Loupe to support:
 You can see the `CONTRIBUTING.md` file to know more about the contributing guidelines.
 
 Pull requests are welcome!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/D1D2YX9OU)

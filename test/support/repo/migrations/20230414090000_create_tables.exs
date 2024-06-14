@@ -1,9 +1,14 @@
 defmodule Loupe.Test.Ecto.Migrations.CreateTables do
   use Ecto.Migration
 
+  @type_name :money
+  @create_money_type ~s|CREATE TYPE public.#{@type_name} AS (amount integer, currency varchar)|
+  @drop_money_type ~s|DROP TYPE IF EXISTS #{@type_name}|
   def change do
+    execute(@create_money_type, @drop_money_type)
+
     create(table("roles")) do
-      add(:slug, :email)
+      add(:slug, :string)
     end
 
     create(table("users")) do
@@ -19,6 +24,7 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
       add(:title, :string)
       add(:body, :string)
       add(:score, :float)
+      add(:price, :money)
       add(:user_id, references("users"))
     end
 

@@ -148,12 +148,12 @@ if Code.ensure_loaded?(Ecto) do
 
     defp apply_bounded_filter({:not, {:like, {binding_name, field}, value}}, context) do
       like_value = "%#{unwrap(value, context)}%"
-      dynamic([{^binding_name, binding}], not like(field(binding, ^field), ^like_value))
+      dynamic([{^binding_name, binding}], not ilike(field(binding, ^field), ^like_value))
     end
 
     defp apply_bounded_filter({:like, {binding_name, field}, value}, context) do
       like_value = "%#{unwrap(value, context)}%"
-      dynamic([{^binding_name, binding}], like(field(binding, ^field), ^like_value))
+      dynamic([{^binding_name, binding}], ilike(field(binding, ^field), ^like_value))
     end
 
     defp binding_field({:binding, [field]}, _context) do

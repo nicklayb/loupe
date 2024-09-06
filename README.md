@@ -117,7 +117,6 @@ Here are some things that I would like Loupe to support:
 - Support some more complex fields prefixed by ~ (or whatever syntax, inspired by elixir's sigils) like the examples below
   - `get all Product where price = ~99.99$` and have that use the Elixir money lib.
   - `get all Item where ratio = ~1/4`
-- Replace SQLite in test for Postgres and replace `like` for `ilike` in the Ecto Query builder. It has been done like that to avoid messing around with a postgres container only for test but I think it's better to go that route for maximum featureset.
 - Implement a LiveView UI lib that shows the strucutres as expandable. Being able to click on a User's `posts` to automatically preload all of its nested Posts.
   - Also have "block" UI module where you can simply create a query from dropdowns in a form for non-power user.
 - Make lexer and parser swappable. Right now, you are stuck with the internal structure that I came up with. The idea would be to allow some to swap the syntax for anything they want. For instance, a french team could implement a french query language to give to their normal user.

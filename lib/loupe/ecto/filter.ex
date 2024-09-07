@@ -7,7 +7,7 @@ if Code.ensure_loaded?(Ecto) do
     alias Loupe.Ecto.Context
     alias Loupe.Language.Ast
 
-    @callback apply_bounded_query(Ast.predicate(), Context.t()) :: Ecto.Query.t()
+    @callback apply_bounded_filter(Ast.predicate(), Context.t()) :: Ecto.Query.t()
 
     defmacro __using__(_) do
       quote do

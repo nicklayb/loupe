@@ -145,7 +145,11 @@ defmodule Loupe.Language.Ast do
 
   defp walk_predicates(reserved) when is_reserved_keyword(reserved), do: reserved
 
-  defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &to_string/1)}
+  defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &map_binary_part/1)}
+
+  defp map_binary_part({:path, parts}), do: {:path, Enum.map(parts, &to_string/1)}
+
+  defp map_binary_part(binding_part), do: to_string(binding_part)
 
   @doc "Extracts bindings of an AST"
   @spec bindings(t()) :: [[binary()]]

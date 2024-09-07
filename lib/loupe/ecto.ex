@@ -106,69 +106,168 @@ if Code.ensure_loaded?(Ecto) do
       apply_bounded_filter({operand, binding_path, value}, context)
     end
 
-    defp apply_bounded_filter({:!=, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:!=, {binding_name, field, :no_path}, value}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) != ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:not, {:=, {binding_name, field}, :empty}}, _context) do
+    defp apply_bounded_filter({:not, {:=, {binding_name, field, :no_path}, :empty}}, _context) do
       dynamic([{^binding_name, binding}], not is_nil(field(binding, ^field)))
     end
 
-    defp apply_bounded_filter({:=, {binding_name, field}, :empty}, _context) do
+    defp apply_bounded_filter({:=, {binding_name, field, :no_path}, :empty}, _context) do
       dynamic([{^binding_name, binding}], is_nil(field(binding, ^field)))
     end
 
-    defp apply_bounded_filter({:=, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:=, {binding_name, field, :no_path}, value}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) == ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:>, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:>, {binding_name, field, :no_path}, value}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) > ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:<, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:<, {binding_name, field, :no_path}, value}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) < ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:>=, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:>=, {binding_name, field, :no_path}, value}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) >= ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:<=, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:<=, {binding_name, field, :no_path}, value}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) <= ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:in, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:in, {binding_name, field, :no_path}, value}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) in ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:not, {:in, {binding_name, field}, value}}, context) do
+    defp apply_bounded_filter({:not, {:in, {binding_name, field, :no_path}, value}}, context) do
       dynamic([{^binding_name, binding}], field(binding, ^field) not in ^unwrap(value, context))
     end
 
-    defp apply_bounded_filter({:not, {:like, {binding_name, field}, value}}, context) do
+    defp apply_bounded_filter({:not, {:like, {binding_name, field, :no_path}, value}}, context) do
       like_value = "%#{unwrap(value, context)}%"
       dynamic([{^binding_name, binding}], not ilike(field(binding, ^field), ^like_value))
     end
 
-    defp apply_bounded_filter({:like, {binding_name, field}, value}, context) do
+    defp apply_bounded_filter({:like, {binding_name, field, :no_path}, value}, context) do
       like_value = "%#{unwrap(value, context)}%"
       dynamic([{^binding_name, binding}], ilike(field(binding, ^field), ^like_value))
     end
 
+    defp apply_bounded_filter({:!=, {binding_name, field, json_path}, value}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) != ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:not, {:=, {binding_name, field, json_path}, :empty}}, _context) do
+      dynamic(
+        [{^binding_name, binding}],
+        not is_nil(json_extract_path(field(binding, ^field), ^json_path))
+      )
+    end
+
+    defp apply_bounded_filter({:=, {binding_name, field, json_path}, :empty}, _context) do
+      dynamic(
+        [{^binding_name, binding}],
+        is_nil(json_extract_path(field(binding, ^field), ^json_path))
+      )
+    end
+
+    defp apply_bounded_filter({:=, {binding_name, field, json_path}, value}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) == ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:>, {binding_name, field, json_path}, value}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) > ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:<, {binding_name, field, json_path}, value}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) < ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:>=, {binding_name, field, json_path}, value}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) >= ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:<=, {binding_name, field, json_path}, value}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) <= ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:in, {binding_name, field, json_path}, value}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) in ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:not, {:in, {binding_name, field, json_path}, value}}, context) do
+      dynamic(
+        [{^binding_name, binding}],
+        json_extract_path(field(binding, ^field), ^json_path) not in ^unwrap(value, context)
+      )
+    end
+
+    defp apply_bounded_filter({:not, {:like, {binding_name, field, json_path}, value}}, context) do
+      like_value = "%#{unwrap(value, context)}%"
+
+      dynamic(
+        [{^binding_name, binding}],
+        not ilike(json_extract_path(field(binding, ^field), ^json_path), ^like_value)
+      )
+    end
+
+    defp apply_bounded_filter({:like, {binding_name, field, json_path}, value}, context) do
+      like_value = "%#{unwrap(value, context)}%"
+
+      dynamic(
+        [{^binding_name, binding}],
+        ilike(json_extract_path(field(binding, ^field), ^json_path), ^like_value)
+      )
+    end
+
+    defp binding_field({:binding, [field, {:path, path}]}, _context) do
+      {:root, String.to_existing_atom(field), path}
+    end
+
     defp binding_field({:binding, [field]}, _context) do
-      {:root, String.to_existing_atom(field)}
+      {:root, String.to_existing_atom(field), :no_path}
     end
 
     defp binding_field({:binding, path}, %Context{bindings: bindings}) do
-      [field | rest] = Enum.reverse(path)
+      {field, path, rest} =
+        case Enum.reverse(path) do
+          [{:path, path}, field | rest] ->
+            {field, path, rest}
+
+          [field | rest] ->
+            {field, :no_path, rest}
+        end
 
       binding =
         Enum.reduce(rest, [], fn step, accumulator ->
           [String.to_existing_atom(step) | accumulator]
         end)
 
-      {Map.fetch!(bindings, binding), String.to_existing_atom(field)}
+      {Map.fetch!(bindings, binding), String.to_existing_atom(field), path}
     end
 
     defp unwrap({:sigil, string}, context) do

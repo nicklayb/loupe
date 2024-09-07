@@ -1,5 +1,7 @@
 import Config
 
+config(:logger, level: :info)
+
 config(:loupe, ecto_repos: [Loupe.Test.Ecto.Repo])
 
 config(:loupe, Loupe.Test.Ecto.Repo,

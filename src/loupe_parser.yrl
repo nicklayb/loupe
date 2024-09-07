@@ -5,7 +5,7 @@ negate open_paren close_paren float open_bracket close_bracket
 empty sigil.
 
 Nonterminals
-quantifier predicates predicate expression binding literal list inner_list string_literal.
+quantifier predicates predicate expression binding literal list inner_list string_literal path inner_path path_part.
 
 Rootsymbol expression.
 
@@ -40,6 +40,7 @@ predicate -> binding : {'=', {binding, '$1'}, true}.
 predicate -> negate binding : {'=', {binding, '$2'}, false}.
 
 binding -> identifier dot binding : [unwrap('$1') | '$3'].
+binding -> identifier path : [unwrap('$1'), '$2'].
 binding -> identifier : [unwrap('$1')].
 
 literal -> string_literal : '$1'.
@@ -48,6 +49,14 @@ literal -> float : {float, unwrap('$1')}.
 literal -> sigil : {sigil, unwrap('$1')}.
 
 string_literal -> string : {string, unwrap('$1')}.
+
+path -> open_bracket inner_path close_bracket : {path, '$2'}.
+
+inner_path -> path_part comma inner_path : ['$1' | '$3'].
+inner_path -> path_part : ['$1'].
+
+path_part -> string : unwrap('$1').
+path_part -> identifier : unwrap('$1').
 
 list -> open_bracket inner_list close_bracket : {list, '$2'}.
 

@@ -63,6 +63,16 @@ For boolean, the binding can be provided as is and prefixed by `not` for false. 
 
 So far, the syntax supprts `and` and `or` and use parenthese to scope the expressions.
 
+### Path binding
+
+Loupe now supports "Path binding", being able to specify a path (like a json path) on a field. This is used by te Ecto implementation to query json field like below:
+
+```
+get User where role.permissions[posts, access] = "write"
+# or
+get User where role.permissions["posts", "access"] = "write"
+```
+
 ## Ecto usage
 
 ### Create a Definition module

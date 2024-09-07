@@ -33,6 +33,7 @@ defmodule Loupe.Test.Ecto do
 
     schema("roles") do
       field(:slug, :string)
+      field(:permissions, :map)
     end
   end
 

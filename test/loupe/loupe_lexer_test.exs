@@ -102,5 +102,18 @@ defmodule LoupeLexerTest do
       assert {:ok, [{:open_bracket, 1, :"["}], 1} = :loupe_lexer.string('[')
       assert {:ok, [{:close_bracket, 1, :"]"}], 1} = :loupe_lexer.string(']')
     end
+
+    test "parse path" do
+      assert {:ok,
+              [
+                {:open_bracket, 1, :"["},
+                {:string, 1, 'first'},
+                {:comma, 1, :","},
+                {:identifier, 1, 'second'},
+                {:comma, 1, :","},
+                {:string, 1, 'third'},
+                {:close_bracket, 1, :"]"}
+              ], 1} = :loupe_lexer.string('["first", second, "third"]')
+    end
   end
 end

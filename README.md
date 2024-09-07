@@ -63,9 +63,9 @@ For boolean, the binding can be provided as is and prefixed by `not` for false. 
 
 So far, the syntax supprts `and` and `or` and use parenthese to scope the expressions.
 
-### Json query
+### Path binding
 
-If you have schemas that have json columns, you can query them as well using the `[]` opterators on a given field like below
+Loupe now supports "Path binding", being able to specify a path (like a json path) on a field. This is used by te Ecto implementation to query json field like below:
 
 ```
 get User where role.permissions[posts, access] = "write"

@@ -27,6 +27,7 @@ All = all
 Get = get
 Where = where
 Empty = :empty
+Colon = :
 
 Identifier        = [A-Za-z][A-Za-z0-9_]*
 FractionalPart    = \.{Digit}+
@@ -54,6 +55,7 @@ Rules.
 {LikeOperand}   : {token, {like,              TokenLine, list_to_atom(TokenChars)}}.
 {Not}           : {token, {negate,            TokenLine, list_to_atom(TokenChars)}}.
 {Dot}           : {token, {dot,               TokenLine, list_to_atom(TokenChars)}}.
+{Colon}         : {token, {colon,             TokenLine, list_to_atom(TokenChars)}}.
 {Identifier}    : {token, {identifier,        TokenLine, TokenChars}}.
 {OpenParen}     : {token, {open_paren,        TokenLine, list_to_atom(TokenChars)}}.
 {CloseParen}    : {token, {close_paren,       TokenLine, list_to_atom(TokenChars)}}.

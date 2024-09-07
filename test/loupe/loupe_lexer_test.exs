@@ -115,5 +115,14 @@ defmodule LoupeLexerTest do
                 {:close_bracket, 1, :"]"}
               ], 1} = :loupe_lexer.string('["first", second, "third"]')
     end
+
+    test "parse variant" do
+      assert {:ok,
+              [
+                {:identifier, 1, 'field'},
+                {:colon, 1, :":"},
+                {:identifier, 1, 'variant'}
+              ], _} = :loupe_lexer.string('field:variant')
+    end
   end
 end

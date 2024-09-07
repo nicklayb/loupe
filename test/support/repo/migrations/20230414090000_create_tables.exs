@@ -2,6 +2,8 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
   use Ecto.Migration
 
   def change do
+    execute("CREATE TYPE public.money AS (amount integer, currency varchar(3))")
+
     create(table("roles")) do
       add(:slug, :string)
       add(:permissions, :map)
@@ -21,6 +23,7 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
       add(:body, :string)
       add(:score, :float)
       add(:user_id, references("users"))
+      add(:price, :money)
     end
 
     create(table("comments")) do

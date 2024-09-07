@@ -2,7 +2,7 @@ Terminals
 where all identifier dot boolean_operator
 list_operand like comma operand string integer
 negate open_paren close_paren float open_bracket close_bracket
-empty sigil.
+empty sigil colon.
 
 Nonterminals
 quantifier predicates predicate expression binding literal list inner_list string_literal path inner_path path_part.
@@ -41,6 +41,7 @@ predicate -> negate binding : {'=', {binding, '$2'}, false}.
 
 binding -> identifier dot binding : [unwrap('$1') | '$3'].
 binding -> identifier path : [unwrap('$1'), '$2'].
+binding -> identifier colon identifier : [unwrap('$1'), {variant, '$3'}].
 binding -> identifier : [unwrap('$1')].
 
 literal -> string_literal : '$1'.

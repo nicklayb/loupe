@@ -265,7 +265,7 @@ defmodule Loupe.EctoTest do
     end
 
     test "selects using composite field variant" do
-      assert [%Post{price: %Money{amount: 10000}}] =
+      assert [%Post{price: %Money{amount: 10_000}}] =
                run_query(~s|get Post where price:amount > 1000|)
 
       assert [%Post{price: %Money{amount: 1000}}] =

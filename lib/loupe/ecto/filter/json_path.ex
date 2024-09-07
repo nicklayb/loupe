@@ -1,5 +1,11 @@
 if Code.ensure_loaded?(Ecto) do
   defmodule Loupe.Ecto.Filter.JsonPath do
+    @moduledoc """
+    Defines functions for querying using a field with a path. 
+    This is invoked when you refer a field plus a path for json fields:
+
+        get Post where user.role.permissions["categories", "access"] = "write"
+    """
     use Loupe.Ecto.Filter
 
     @impl Loupe.Ecto.Filter

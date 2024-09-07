@@ -1,5 +1,11 @@
 if Code.ensure_loaded?(Ecto) do
   defmodule Loupe.Ecto.Filter.CompositeVariant do
+    @moduledoc """
+    Defines functions for querying using a composite field from a variant. 
+    This is invoked when you refer a field variant using `:` like:
+
+        get User where posts.price:amount > 100
+    """
     use Loupe.Ecto.Filter
 
     @impl Loupe.Ecto.Filter

@@ -1,5 +1,11 @@
 if Code.ensure_loaded?(Ecto) do
   defmodule Loupe.Ecto.Filter.Direct do
+    @moduledoc """
+    Defines functions for querying using a direct field. 
+    This is invoked when you refer a field directly (without path or variant):
+
+        get User where posts.title ="Why the sun exists?"
+    """
     use Loupe.Ecto.Filter
 
     @impl Loupe.Ecto.Filter

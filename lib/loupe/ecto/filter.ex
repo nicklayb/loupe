@@ -1,5 +1,9 @@
 if Code.ensure_loaded?(Ecto) do
   defmodule Loupe.Ecto.Filter do
+    @moduledoc """
+    Module to implement various filter depending on field type. This is
+    how we build query with Ecto depending on the kind of field we receive
+    """
     alias Loupe.Ecto.Context
     alias Loupe.Language.Ast
 
@@ -13,6 +17,9 @@ if Code.ensure_loaded?(Ecto) do
       end
     end
 
+    @doc """
+    Access a composite field dynamically
+    """
     defmacro composite_access(field, composite_field) do
       quote do
         fragment("(?).?", unquote(field), literal(unquote(composite_field)))

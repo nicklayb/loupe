@@ -258,6 +258,23 @@ defmodule Loupe.EctoTest do
                run_query(~s|get User where role.permissions[folders, access] = "write"|,
                  preload: [:role]
                )
+
+      assert [
+               %Role{permissions: %{"folders" => %{"access" => "write"}}}
+             ] = run_query(~s|get Role where permissions[folders, access] = "write"|)
+    end
+
+    test "selects using composite field variant" do
+      assert [%Post{price: %Money{amount: 10000}}] =
+               run_query(~s|get Post where price:amount > 1000|)
+
+      assert [%Post{price: %Money{amount: 1000}}] =
+               run_query(~s|get Post where price:amount = 1000|)
+
+      assert [%User{posts: [%Post{price: %Money{amount: 1000}}]}] =
+               run_query(~s|get User where posts.price:amount = 1000|, preload: [:posts])
+
+      assert [] = run_query(~s|get Post where price:amount < 1000|)
     end
 
     test "selects only allowed fields" do
@@ -296,7 +313,8 @@ defmodule Loupe.EctoTest do
           title: "My post",
           comments: [
             %Comment{text: "That's something"}
-          ]
+          ],
+          price: Money.new(1000, :CAD)
         }
       ],
       user_external_keys: [
@@ -331,7 +349,8 @@ defmodule Loupe.EctoTest do
           score: 1.5,
           comments: [
             %Comment{text: "That's a comment"}
-          ]
+          ],
+          price: Money.new(10_000, :CAD)
         }
       ]
     })

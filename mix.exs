@@ -62,7 +62,8 @@ defmodule Loupe.MixProject do
       {:excoveralls, "~> 0.16", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:postgrex, ">= 0.0.0", only: [:dev, :test]}
+      {:postgrex, ">= 0.0.0", only: [:dev, :test]},
+      {:money, "~> 1.10", only: [:dev, :test]}
     ]
   end
 

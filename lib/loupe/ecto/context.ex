@@ -211,6 +211,10 @@ if Code.ensure_loaded?(Ecto) do
       validate_binding(context, schema, [binding], accumulator)
     end
 
+    defp validate_binding(%Context{} = context, schema, [binding, {:variant, _}], accumulator) do
+      validate_binding(context, schema, [binding], accumulator)
+    end
+
     defp validate_binding(%Context{} = context, schema, [binding], accumulator) do
       atom_binding = String.to_existing_atom(binding)
 

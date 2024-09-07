@@ -41,7 +41,7 @@ predicate -> negate binding : {'=', {binding, '$2'}, false}.
 
 binding -> identifier dot binding : [unwrap('$1') | '$3'].
 binding -> identifier path : [unwrap('$1'), '$2'].
-binding -> identifier colon identifier : [unwrap('$1'), {variant, '$3'}].
+binding -> identifier colon identifier : [unwrap('$1'), {variant, unwrap('$3')}].
 binding -> identifier : [unwrap('$1')].
 
 literal -> string_literal : '$1'.

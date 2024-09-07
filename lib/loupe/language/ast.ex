@@ -147,6 +147,8 @@ defmodule Loupe.Language.Ast do
 
   defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &map_binary_part/1)}
 
+  defp map_binary_part({:variant, variant}), do: {:variant, to_string(variant)}
+
   defp map_binary_part({:path, parts}), do: {:path, Enum.map(parts, &to_string/1)}
 
   defp map_binary_part(binding_part), do: to_string(binding_part)

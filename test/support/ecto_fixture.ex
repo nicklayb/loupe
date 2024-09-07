@@ -23,6 +23,8 @@ defmodule Loupe.Test.Ecto do
       field(:user_id, :integer)
       field(:score, :float)
 
+      field(:price, Money.Ecto.Composite.Type)
+
       has_many(:comments, Comment)
     end
   end

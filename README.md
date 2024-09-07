@@ -63,6 +63,14 @@ For boolean, the binding can be provided as is and prefixed by `not` for false. 
 
 So far, the syntax supprts `and` and `or` and use parenthese to scope the expressions.
 
+### Field variant
+
+Recently, support for "field variant" has been added. It's a syntax that allows to "customize" a field. The Ecto implementation uses the variant to query composite fields. Assume you have a composite Postgres field that is Money (like the [Money.Ecto.Composite.Type](https://hexdocs.pm/money/Money.Ecto.Composite.Type.html) type from the Money lib), you can now do the following to query the amount:
+
+```
+get User where bank_account:amount >= 1k
+```
+
 ### Path binding
 
 Loupe now supports "Path binding", being able to specify a path (like a json path) on a field. This is used by te Ecto implementation to query json field like below:

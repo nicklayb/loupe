@@ -207,6 +207,10 @@ if Code.ensure_loaded?(Ecto) do
 
     defp unzip_binding([], {_, all}), do: all
 
+    defp validate_binding(%Context{} = context, schema, [binding, {:path, _}], accumulator) do
+      validate_binding(context, schema, [binding], accumulator)
+    end
+
     defp validate_binding(%Context{} = context, schema, [binding], accumulator) do
       atom_binding = String.to_existing_atom(binding)
 

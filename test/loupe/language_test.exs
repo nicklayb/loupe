@@ -136,6 +136,16 @@ defmodule Loupe.LanguageTest do
                Language.compile(@case)
     end
 
+    @case ~s|get User where role.permissions["folders", "access"] = "write"|
+    test "supports json path bindings" do
+      assert {:ok,
+              %Ast{
+                predicates:
+                  {:=, {:binding, ["role", "permissions", {:path, ["folders", "access"]}]},
+                   {:string, "write"}}
+              }} = Language.compile(@case)
+    end
+
     @case ~s|get User where role.slug not in ["admin", "user"]|
     test "supports not in list operand" do
       assert {:ok,

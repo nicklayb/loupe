@@ -63,6 +63,16 @@ For boolean, the binding can be provided as is and prefixed by `not` for false. 
 
 So far, the syntax supprts `and` and `or` and use parenthese to scope the expressions.
 
+### Json query
+
+If you have schemas that have json columns, you can query them as well using the `[]` opterators on a given field like below
+
+```
+get User where role.permissions[posts, access] = "write"
+# or
+get User where role.permissions["posts", "access"] = "write"
+```
+
 ## Ecto usage
 
 ### Create a Definition module

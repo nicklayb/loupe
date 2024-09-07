@@ -22,7 +22,7 @@ defmodule Loupe.EctoTest do
     test "builds query from string without assigns" do
       assert [
                %User{email: "user@email.com"}
-             ] = run_query(~s|get all User where email = "user@email.com"|, nil)
+             ] = run_query(~s|get all User where email = "user@email.com"|, assigns: nil)
     end
 
     test "builds query with raw ast" do
@@ -75,36 +75,46 @@ defmodule Loupe.EctoTest do
 
     test "builds query with integer quantifier" do
       assert [%User{email: "user@email.com"}] =
-               run_query(~s(get 1 User where email not :empty), %{
-                 role: "admin",
-                 ordered_by_id: true
-               })
+               run_query(~s(get 1 User where email not :empty),
+                 assigns: %{
+                   role: "admin",
+                   ordered_by_id: true
+                 }
+               )
 
       assert [%User{email: "user@email.com"}, %User{email: "something@gmail.com"}] =
-               run_query(~s(get 2 User where email not :empty), %{
-                 role: "admin",
-                 ordered_by_id: true
-               })
+               run_query(~s(get 2 User where email not :empty),
+                 assigns: %{
+                   role: "admin",
+                   ordered_by_id: true
+                 }
+               )
     end
 
     test "builds query with range quantifier" do
       assert [%User{email: "user@email.com"}] =
-               run_query(~s(get 0..1 User where email not :empty), %{
-                 role: "admin",
-                 ordered_by_id: true
-               })
+               run_query(~s(get 0..1 User where email not :empty),
+                 assigns: %{
+                   role: "admin",
+                   ordered_by_id: true
+                 }
+               )
 
       assert [%User{email: "something@gmail.com"}] =
-               run_query(~s(get 1..2 User where email not :empty), %{
-                 role: "admin",
-                 ordered_by_id: true
-               })
+               run_query(~s(get 1..2 User where email not :empty),
+                 assigns: %{
+                   role: "admin",
+                   ordered_by_id: true
+                 }
+               )
 
       assert [%User{email: "something@gmail.com"}, %User{email: "another_user@email.com"}] =
-               run_query(~s(get 1..3 User where email not :empty), %{
-                 role: "admin",
-                 ordered_by_id: true
-               })
+               run_query(~s(get 1..3 User where email not :empty),
+                 assigns: %{
+                   role: "admin",
+                   ordered_by_id: true
+                 }
+               )
     end
 
     test "queries using and operator" do
@@ -221,19 +231,47 @@ defmodule Loupe.EctoTest do
       assert [
                %User{name: "Jane Doe", email: "user@email.com"}
              ] =
-               run_query(~s|get all User where external_keys.external_id = "janedoe"|, %{
-                 role: "admin"
-               })
+               run_query(~s|get all User where external_keys.external_id = "janedoe"|,
+                 assigns: %{
+                   role: "admin"
+                 }
+               )
+    end
+
+    test "selects using json path" do
+      assert [
+               %User{
+                 name: "Jane Doe",
+                 role: %Role{permissions: %{"folders" => %{"access" => "write"}}}
+               }
+             ] =
+               run_query(~s|get User where role.permissions["folders", "access"] = "write"|,
+                 preload: [:role]
+               )
+
+      assert [
+               %User{
+                 name: "Jane Doe",
+                 role: %Role{permissions: %{"folders" => %{"access" => "write"}}}
+               }
+             ] =
+               run_query(~s|get User where role.permissions[folders, access] = "write"|,
+                 preload: [:role]
+               )
     end
 
     test "selects only allowed fields" do
       assert [
                %User{name: "Jane Doe", email: "user@email.com"}
-             ] = run_query(~s|get all User where email = "user@email.com"|, %{role: "admin"})
+             ] =
+               run_query(~s|get all User where email = "user@email.com"|,
+                 assigns: %{role: "admin"}
+               )
 
       assert [
                %User{name: nil, email: "user@email.com"}
-             ] = run_query(~s|get all User where email = "user@email.com"|, %{role: "user"})
+             ] =
+               run_query(~s|get all User where email = "user@email.com"|, assigns: %{role: "user"})
     end
 
     test "returns error if query field is not allowed" do
@@ -248,7 +286,7 @@ defmodule Loupe.EctoTest do
 
   defp setup_entities(_) do
     Repo.insert!(%User{
-      role: %Role{slug: "admin"},
+      role: %Role{slug: "admin", permissions: %{"folders" => %{"access" => "write"}}},
       email: "user@email.com",
       name: "Jane Doe",
       bank_account: 1_000,
@@ -274,7 +312,7 @@ defmodule Loupe.EctoTest do
       name: "John Doe",
       email: "something@gmail.com",
       bank_account: 400_000,
-      role: %Role{slug: "user"},
+      role: %Role{slug: "user", permissions: %{"folders" => %{"access" => "none"}}},
       user_external_keys: [
         %UserExternalKey{
           external_key: %ExternalKey{external_id: "johndoe"}
@@ -301,7 +339,10 @@ defmodule Loupe.EctoTest do
     []
   end
 
-  defp run_query(query, assigns \\ %{role: "admin"}) do
+  defp run_query(query, options \\ []) do
+    assigns = Keyword.get(options, :assigns, %{role: "admin"})
+    preload = Keyword.get(options, :preload, [])
+
     result =
       case assigns do
         nil ->
@@ -317,6 +358,8 @@ defmodule Loupe.EctoTest do
 
     assert {:ok, %Ecto.Query{} = ecto_query, _context} = result
 
-    Repo.all(ecto_query)
+    ecto_query
+    |> Repo.all()
+    |> Repo.preload(preload)
   end
 end

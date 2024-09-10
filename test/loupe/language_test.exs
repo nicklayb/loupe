@@ -199,6 +199,15 @@ defmodule Loupe.LanguageTest do
               }} = Language.compile(@case)
     end
 
+    @case ~s|get User{order: {direction: "asc", field: "inserted_at"}} where age > 50|
+    test "supports parameterized schema" do
+      assert {:ok,
+              %Ast{
+                predicates: {:>, {:binding, ["age"]}, {:int, 50}},
+                parameters: %{"order" => %{"direction" => "asc", "field" => "inserted_at"}}
+              }} = Language.compile(@case)
+    end
+
     @failing_case ~s|get User where name = "d|
     test "intercepts raise errors" do
       assert {:error, %Loupe.Errors.LexerError{line: 1, message: {:illegal, '"d'}}} =

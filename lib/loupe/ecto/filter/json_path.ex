@@ -8,6 +8,8 @@ if Code.ensure_loaded?(Ecto) do
     """
     use Loupe.Ecto.Filter
 
+    alias Loupe.Ecto.OperatorError
+
     @impl Loupe.Ecto.Filter
     def apply_bounded_filter({:!=, {binding_name, field, {:path, json_path}}, value}, context) do
       dynamic(
@@ -89,24 +91,23 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     def apply_bounded_filter(
-          {:not, {:like, {binding_name, field, {:path, json_path}}, value}},
-          context
+          {:not, {:like, {_binding_name, field, {:path, json_path}}, _value}},
+          _context
         ) do
-      like_value = "%#{unwrap(value, context)}%"
-
-      dynamic(
-        [{^binding_name, binding}],
-        not ilike(json_extract_path(field(binding, ^field), ^json_path), ^like_value)
-      )
+      raise OperatorError,
+        operator: "not like",
+        binding: "#{field}[#{inspect(json_path)}]",
+        message: "Paths doesn't support like operator"
     end
 
-    def apply_bounded_filter({:like, {binding_name, field, {:path, json_path}}, value}, context) do
-      like_value = "%#{unwrap(value, context)}%"
-
-      dynamic(
-        [{^binding_name, binding}],
-        ilike(json_extract_path(field(binding, ^field), ^json_path), ^like_value)
-      )
+    def apply_bounded_filter(
+          {:like, {_binding_name, field, {:path, json_path}}, _value},
+          _context
+        ) do
+      raise OperatorError,
+        operator: "like",
+        binding: "#{field}[#{inspect(json_path)}]",
+        message: "Paths doesn't support like operator"
     end
   end
 end

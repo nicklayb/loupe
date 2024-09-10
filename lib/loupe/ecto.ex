@@ -161,24 +161,16 @@ if Code.ensure_loaded?(Ecto) do
       context
       |> Context.sorted_bindings()
       |> Enum.reduce(query, fn {path, binding}, accumulator ->
-        join_spec = parent_binding(bindings, path)
+        {name, parent_binding} = parent_binding(bindings, path)
 
-        join_once(accumulator, binding, join_spec)
-      end)
-    end
-
-    defp join_once(query, binding, {name, parent_binding}) do
-      if has_named_binding?(query, binding) do
-        query
-      else
         join(
-          query,
+          accumulator,
           :left,
           [{^parent_binding, parent}],
           association in assoc(parent, ^name),
           as: ^binding
         )
-      end
+      end)
     end
 
     defp parent_binding(bindings, path) do

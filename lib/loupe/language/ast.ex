@@ -193,7 +193,7 @@ defmodule Loupe.Language.Ast do
   defp extract_bindings(_, accumulator), do: accumulator
 
   @doc "Unwraps literal"
-  @spec unwrap_literal(literal() | boolean() | object()) :: any()
+  @spec unwrap_literal(literal() | object()) :: any()
   def unwrap_literal({:object, pairs}) do
     Enum.reduce(pairs, %{}, fn {key, value}, acc ->
       Map.put(acc, to_string(key), unwrap_literal(value))
@@ -208,6 +208,4 @@ defmodule Loupe.Language.Ast do
   def unwrap_literal({:sigil, {char, string}}) do
     {:sigil, char, to_string(string)}
   end
-
-  def unwrap_literal(boolean) when is_boolean(boolean), do: boolean
 end

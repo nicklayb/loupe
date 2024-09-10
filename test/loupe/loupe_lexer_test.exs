@@ -124,5 +124,52 @@ defmodule LoupeLexerTest do
                 {:identifier, 1, 'variant'}
               ], _} = :loupe_lexer.string('field:variant')
     end
+
+    test "parse object" do
+      assert {:ok,
+              [
+                {:open_curly, 1, :"{"},
+                #
+                {:identifier, 1, 'key'},
+                {:colon, 1, :":"},
+                {:string, 1, 'value'},
+                {:comma, 1, :","},
+                #
+                {:identifier, 1, 'int'},
+                {:colon, 1, :":"},
+                {:integer, 1, 1},
+                {:comma, 1, :","},
+                #
+                {:identifier, 1, 'float'},
+                {:colon, 1, :":"},
+                {:float, 1, 2.3},
+                {:comma, 1, :","},
+                #
+                {:identifier, 1, 'object'},
+                {:colon, 1, :":"},
+                {:open_curly, 1, :"{"},
+                #
+                {:identifier, 1, 'sigil'},
+                {:colon, 1, :":"},
+                {:sigil, 1, {'m', 'sigil'}},
+                {:comma, 1, :","},
+                #
+                {:identifier, 1, 'list'},
+                {:colon, 1, :":"},
+                {:open_bracket, 1, :"["},
+                {:integer, 1, 1},
+                {:comma, 1, :","},
+                {:integer, 1, 2},
+                {:comma, 1, :","},
+                {:integer, 1, 3},
+                {:close_bracket, 1, :"]"},
+                {:close_curly, 1, :"}"},
+                {:close_curly, 1, :"}"}
+              ],
+              _} =
+               :loupe_lexer.string(
+                 '{key: "value", int: 1, float: 2.3, object: {sigil: ~m"sigil", list: [1, 2, 3]}}'
+               )
+    end
   end
 end

@@ -2,13 +2,9 @@ defmodule Loupe.EctoTest do
   use Loupe.TestCase, async: false
 
   alias Loupe.Ecto, as: LoupeEcto
-  alias Loupe.Test.Ecto.Comment
-  alias Loupe.Test.Ecto.ExternalKey
   alias Loupe.Test.Ecto.Post
-  alias Loupe.Test.Ecto.Repo
   alias Loupe.Test.Ecto.Role
   alias Loupe.Test.Ecto.User
-  alias Loupe.Test.Ecto.UserExternalKey
 
   @implementation Loupe.Test.Ecto.Definition
 
@@ -56,6 +52,19 @@ defmodule Loupe.EctoTest do
                where (
                  posts.title like "post"
                  and posts.score > 0.5
+               )
+               """)
+    end
+
+    test "builds query joining multiple time the same binding from parent" do
+      assert [
+               %User{email: "another_user@email.com"}
+             ] =
+               run_query("""
+               get all User 
+               where (
+                 posts.title like "post"
+                 and posts.comments.text like "comment"
                )
                """)
     end
@@ -123,12 +132,6 @@ defmodule Loupe.EctoTest do
              ] = run_query(~s|get all User where age > 18 and age < 30|)
     end
 
-    test "queries float" do
-      assert [
-               %Post{score: 1.5}
-             ] = run_query(~s|get all Post where score > 0.5|)
-    end
-
     test "queries using or operator" do
       assert [_, _] = results = run_query(~s|get all User where age < 20 or age > 29|)
       assert Enum.any?(results, &match?(%User{email: "something@gmail.com"}, &1))
@@ -140,93 +143,6 @@ defmodule Loupe.EctoTest do
                run_query(~s|get all User where bank_account > ~m"400.00"|)
     end
 
-    test "queries using thruty operator" do
-      assert [
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where active|)
-    end
-
-    test "queries using falsy operator" do
-      assert [
-               %User{email: "user@email.com"},
-               %User{email: "another_user@email.com"}
-             ] = run_query(~s|get all User where not active|)
-    end
-
-    test "queries using > operator" do
-      assert [
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where age > 25|)
-    end
-
-    test "queries using >= operator" do
-      assert [
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where age >= 30|)
-    end
-
-    test "queries using <= operator" do
-      assert [
-               %User{email: "user@email.com"}
-             ] = run_query(~s|get all User where age <= 18|)
-    end
-
-    test "queries using < operator" do
-      assert [
-               %User{email: "user@email.com"}
-             ] = run_query(~s|get all User where age < 20|)
-    end
-
-    test "queries using = operator" do
-      assert [
-               %User{email: "user@email.com"}
-             ] = run_query(~s|get all User where email = "user@email.com"|)
-    end
-
-    test "queries using != operator" do
-      assert [
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where role.slug != "admin"|)
-    end
-
-    test "queries using like operator" do
-      assert [
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where email like "gmail"|)
-    end
-
-    test "queries using not like operator" do
-      assert [
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where email not like "email.com"|)
-    end
-
-    test "queries using :empty keyword" do
-      assert [
-               %User{email: "another_user@email.com"}
-             ] = run_query(~s|get all User where name :empty|)
-    end
-
-    test "queries using in operator" do
-      assert [
-               %User{email: "user@email.com"},
-               %User{email: "another_user@email.com"}
-             ] = run_query(~s|get all User where age in [18, 21]|)
-    end
-
-    test "queries using not in operator" do
-      assert [
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where age not in [18, 21]|)
-    end
-
-    test "queries using not :empty keyword" do
-      assert [
-               %User{email: "user@email.com"},
-               %User{email: "something@gmail.com"}
-             ] = run_query(~s|get all User where name not :empty|)
-    end
-
     test "selects has_many through relation" do
       assert [
                %User{name: "Jane Doe", email: "user@email.com"}
@@ -236,6 +152,19 @@ defmodule Loupe.EctoTest do
                    role: "admin"
                  }
                )
+    end
+
+    test "selects belongs_to key when relation allowed" do
+      assert [
+               %Post{title: "My amazing post", moderator_id: moderator_id}
+             ] =
+               run_query(~s|get Post where title = "My amazing post"|,
+                 assigns: %{
+                   role: "normal_user"
+                 }
+               )
+
+      assert is_integer(moderator_id)
     end
 
     test "selects using json path" do
@@ -299,86 +228,5 @@ defmodule Loupe.EctoTest do
                  %{role: "user"}
                )
     end
-  end
-
-  defp setup_entities(_) do
-    Repo.insert!(%User{
-      role: %Role{slug: "admin", permissions: %{"folders" => %{"access" => "write"}}},
-      email: "user@email.com",
-      name: "Jane Doe",
-      bank_account: 1_000,
-      age: 18,
-      posts: [
-        %Post{
-          title: "My post",
-          comments: [
-            %Comment{text: "That's something"}
-          ],
-          price: Money.new(1000, :CAD)
-        }
-      ],
-      user_external_keys: [
-        %UserExternalKey{
-          external_key: %ExternalKey{external_id: "janedoe"}
-        }
-      ]
-    })
-
-    Repo.insert!(%User{
-      age: 30,
-      active: true,
-      name: "John Doe",
-      email: "something@gmail.com",
-      bank_account: 400_000,
-      role: %Role{slug: "user", permissions: %{"folders" => %{"access" => "none"}}},
-      user_external_keys: [
-        %UserExternalKey{
-          external_key: %ExternalKey{external_id: "johndoe"}
-        }
-      ]
-    })
-
-    Repo.insert!(%User{
-      role: %Role{slug: "admin"},
-      email: "another_user@email.com",
-      bank_account: 10_000,
-      age: 21,
-      posts: [
-        %Post{
-          title: "My amazing post",
-          score: 1.5,
-          comments: [
-            %Comment{text: "That's a comment"}
-          ],
-          price: Money.new(10_000, :CAD)
-        }
-      ]
-    })
-
-    []
-  end
-
-  defp run_query(query, options \\ []) do
-    assigns = Keyword.get(options, :assigns, %{role: "admin"})
-    preload = Keyword.get(options, :preload, [])
-
-    result =
-      case assigns do
-        nil ->
-          LoupeEcto.build_query(query, @implementation)
-
-        _ ->
-          LoupeEcto.build_query(
-            query,
-            @implementation,
-            assigns
-          )
-      end
-
-    assert {:ok, %Ecto.Query{} = ecto_query, _context} = result
-
-    ecto_query
-    |> Repo.all()
-    |> Repo.preload(preload)
   end
 end

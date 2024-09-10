@@ -23,6 +23,7 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
       add(:body, :string)
       add(:score, :float)
       add(:user_id, references("users"))
+      add(:moderator_id, references("users"))
       add(:price, :money_with_currency)
     end
 

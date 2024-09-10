@@ -32,10 +32,12 @@ if Code.ensure_loaded?(Ecto) do
       Context.cast_sigil(context, string)
     end
 
-    def unwrap({:string, string}, _context), do: string
-    def unwrap({:int, int}, _context), do: int
-    def unwrap({:float, float}, _context), do: float
-    def unwrap({:list, list}, context), do: Enum.map(list, &unwrap(&1, context))
-    def unwrap(boolean, _context) when is_boolean(boolean), do: boolean
+    def unwrap({:list, items}, context) do
+      Enum.map(items, &unwrap(&1, context))
+    end
+
+    def unwrap(literal, _context) do
+      Loupe.Language.Ast.unwrap_literal(literal)
+    end
   end
 end

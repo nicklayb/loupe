@@ -35,7 +35,7 @@ defmodule Loupe.Language.Ast do
   protobuf all BoardGame where name like "Catan"
   ```
   """
-  defstruct [:action, :quantifier, :predicates, :schema]
+  defstruct [:action, :quantifier, :predicates, :schema, :parameters]
 
   alias Loupe.Language.Ast
 
@@ -61,6 +61,8 @@ defmodule Loupe.Language.Ast do
   @typedoc "Valid boolean operators"
   @type boolean_operator :: :or | :and
 
+  @type object :: {:object, [{binary(), literal() | object()}]}
+
   @typedoc "Validation composed predicates"
   @type predicate ::
           {boolean_operator(), predicate(), predicate()}
@@ -73,11 +75,15 @@ defmodule Loupe.Language.Ast do
   @typedoc "Reserved keywords"
   @type reserved_keyword :: :empty
 
+  @typedoc "Parameters provided to the query"
+  @type parameters :: map()
+
   @type t :: %Ast{
           action: binary(),
           quantifier: quantifier(),
           schema: binary(),
-          predicates: predicate()
+          predicates: predicate(),
+          parameters: parameters()
         }
 
   @operands ~w(!= = > < >= <=)a
@@ -93,13 +99,24 @@ defmodule Loupe.Language.Ast do
   defguardp is_reserved_keyword(reserved_keyword) when reserved_keyword in @reserved_keywords
 
   @doc "Instanciates the AST"
-  @spec new(alpha_identifier(), alpha_identifier(), quantifier(), predicate()) :: t()
-  def new(action, binding, quantifier, predicates) do
+  @spec new(alpha_identifier(), alpha_identifier(), quantifier(), predicate(), object() | nil) ::
+          t()
+  def new(action, binding, quantifier, predicates, parameters \\ nil) do
+    parameters =
+      case parameters do
+        {:object, _} ->
+          unwrap_literal(parameters)
+
+        _ ->
+          nil
+      end
+
     %Ast{
       action: to_string(action),
       quantifier: quantifier,
       predicates: walk_predicates(predicates),
-      schema: to_string(binding)
+      schema: to_string(binding),
+      parameters: parameters
     }
   end
 
@@ -174,4 +191,23 @@ defmodule Loupe.Language.Ast do
   end
 
   defp extract_bindings(_, accumulator), do: accumulator
+
+  @doc "Unwraps literal"
+  @spec unwrap_literal(literal() | boolean() | object()) :: any()
+  def unwrap_literal({:object, pairs}) do
+    Enum.reduce(pairs, %{}, fn {key, value}, acc ->
+      Map.put(acc, to_string(key), unwrap_literal(value))
+    end)
+  end
+
+  def unwrap_literal({:string, string}), do: to_string(string)
+  def unwrap_literal({:int, int}), do: int
+  def unwrap_literal({:float, float}), do: float
+  def unwrap_literal({:list, list}), do: Enum.map(list, &unwrap_literal/1)
+
+  def unwrap_literal({:sigil, {char, string}}) do
+    {:sigil, char, to_string(string)}
+  end
+
+  def unwrap_literal(boolean) when is_boolean(boolean), do: boolean
 end

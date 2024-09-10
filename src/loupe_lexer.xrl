@@ -13,6 +13,8 @@ OpenParen = \(
 CloseParen = \)
 OpenBracket = \[
 CloseBracket = \]
+OpenCurly = \{
+CloseCurly = \}
 Arrow = \=>
 String = "([^"\\]*(\\.[^"\\]*)*)"
 Sigil = ~[a-zA-Z]"([^"\\]*(\\.[^"\\]*)*)"
@@ -61,6 +63,8 @@ Rules.
 {CloseParen}    : {token, {close_paren,       TokenLine, list_to_atom(TokenChars)}}.
 {OpenBracket}   : {token, {open_bracket,      TokenLine, list_to_atom(TokenChars)}}.
 {CloseBracket}  : {token, {close_bracket,     TokenLine, list_to_atom(TokenChars)}}.
+{OpenCurly}     : {token, {open_curly,        TokenLine, list_to_atom(TokenChars)}}.
+{CloseCurly}    : {token, {close_curly,       TokenLine, list_to_atom(TokenChars)}}.
 
 Erlang code.
 

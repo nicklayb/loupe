@@ -137,7 +137,7 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp binding_field({:binding, path}, %Context{bindings: bindings}) do
-      {field, path, rest} = extract_field_access_type()
+      {field, path, rest} = extract_field_access_type(path)
 
       binding =
         Enum.reduce(rest, [], fn step, accumulator ->

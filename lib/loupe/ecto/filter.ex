@@ -39,7 +39,7 @@ if Code.ensure_loaded?(Ecto) do
     def unwrap(boolean, _context) when is_boolean(boolean), do: boolean
 
     def unwrap(literal, _context) do
-      Loupe.Language.Ast.unwrap_literal(literal)
+      Ast.unwrap_literal(literal)
     end
   end
 end

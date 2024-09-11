@@ -10,7 +10,6 @@ defmodule Loupe.EctoTest do
 
   setup_all [
     :start_repo,
-    :setup_entities,
     :checkout_repo
   ]
 

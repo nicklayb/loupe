@@ -5,7 +5,6 @@ defmodule Loupe.Ecto.Filter.JsonPathTest do
 
   setup_all [
     :start_repo,
-    :setup_entities,
     :checkout_repo
   ]
 

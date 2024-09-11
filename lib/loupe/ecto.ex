@@ -137,14 +137,17 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp binding_field({:binding, path}, %Context{bindings: bindings}) do
-      {field, path, rest} = extract_field_access_type(path)
+      {field, field_access, rest} =
+        path
+        |> Enum.reverse()
+        |> extract_field_access_type()
 
       binding =
         Enum.reduce(rest, [], fn step, accumulator ->
           [String.to_existing_atom(step) | accumulator]
         end)
 
-      {Map.fetch!(bindings, binding), String.to_existing_atom(field), path}
+      {Map.fetch!(bindings, binding), String.to_existing_atom(field), field_access}
     end
 
     defp extract_field_access_type([{:variant, _} = variant, field | rest]) do

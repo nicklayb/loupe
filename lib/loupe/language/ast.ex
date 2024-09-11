@@ -35,9 +35,9 @@ defmodule Loupe.Language.Ast do
   protobuf all BoardGame where name like "Catan"
   ```
   """
-  defstruct [:action, :quantifier, :predicates, :schema, :parameters]
-
   alias Loupe.Language.Ast
+
+  defstruct [:action, :quantifier, :predicates, :schema, :parameters]
 
   @typedoc "Range from one value to another"
   @type range :: {integer(), integer()}
@@ -195,8 +195,8 @@ defmodule Loupe.Language.Ast do
   @doc "Unwraps literal"
   @spec unwrap_literal(literal() | object()) :: any()
   def unwrap_literal({:object, pairs}) do
-    Enum.reduce(pairs, %{}, fn {key, value}, acc ->
-      Map.put(acc, to_string(key), unwrap_literal(value))
+    Enum.reduce(pairs, %{}, fn {key, value}, accumulator ->
+      Map.put(accumulator, to_string(key), unwrap_literal(value))
     end)
   end
 

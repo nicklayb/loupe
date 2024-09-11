@@ -60,6 +60,7 @@ if Code.ensure_loaded?(Phoenix.Component) do
     - `inspect_modules` (optional): List of module that should be rendered directly using `inspect/1`.
     - `renderer` (optional): Implementation of Loupe.PhoenixLiveView.Renderer behaviour.
     """
+    @spec render(map()) :: Phoenix.LiveView.Rendered.t()
     def render(assigns) do
       assigns = assign_new(assigns, :definition_assigns, fn -> %{} end)
       assigns = assign_new(assigns, :renderer, fn -> nil end)
@@ -259,8 +260,8 @@ if Code.ensure_loaded?(Phoenix.Component) do
     end
 
     defp related_type(%Ecto.Association.HasThrough{through: through, owner: owner}) do
-      Enum.reduce(through, owner, fn key, acc ->
-        related_type(acc, key)
+      Enum.reduce(through, owner, fn key, accumulator ->
+        related_type(accumulator, key)
       end)
     end
 

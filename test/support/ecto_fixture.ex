@@ -1,5 +1,13 @@
 defmodule Loupe.Test.Ecto do
-  @moduledoc "Mock schemas and Ecto modules for tests"
+  @moduledoc """
+  Mock schemas and Ecto modules for tests.
+
+  For reasons I don't fully understand, seperating this module into
+  seperate files causes compilation issues. Some module aren't loaded
+  properly at the right time and cause problems. Same for some relations,
+  those you see that uses `Module.concat/1`, they need to use this call 
+  because at the time of reading this file, they aren't properly compiled.
+  """
 
   import ExUnit.Assertions
 
@@ -100,8 +108,9 @@ defmodule Loupe.Test.Ecto do
     Example Ecto definition for the modules defined above.
     """
 
-    import Ecto.Query
     @behaviour Loupe.Ecto.Definition
+
+    import Ecto.Query
 
     @schemas %{
       "Post" => Post,

@@ -137,17 +137,7 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp binding_field({:binding, path}, %Context{bindings: bindings}) do
-      {field, path, rest} =
-        case Enum.reverse(path) do
-          [{:variant, _} = variant, field | rest] ->
-            {field, variant, rest}
-
-          [{:path, _} = path, field | rest] ->
-            {field, path, rest}
-
-          [field | rest] ->
-            {field, :direct, rest}
-        end
+      {field, path, rest} = extract_field_access_type()
 
       binding =
         Enum.reduce(rest, [], fn step, accumulator ->
@@ -155,6 +145,18 @@ if Code.ensure_loaded?(Ecto) do
         end)
 
       {Map.fetch!(bindings, binding), String.to_existing_atom(field), path}
+    end
+
+    defp extract_field_access_type([{:variant, _} = variant, field | rest]) do
+      {field, variant, rest}
+    end
+
+    defp extract_field_access_type([{:path, _} = path, field | rest]) do
+      {field, path, rest}
+    end
+
+    defp extract_field_access_type([field | rest]) do
+      {field, :direct, rest}
     end
 
     defp join_relation(query, %Context{bindings: bindings} = context) do

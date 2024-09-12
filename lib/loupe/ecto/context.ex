@@ -203,7 +203,7 @@ if Code.ensure_loaded?(Ecto) do
     defp unzip_binding(binding), do: unzip_binding(binding, {[], []})
 
     defp unzip_binding([left | rest], {current, all}) do
-      current_binding = Enum.reverse([left | current])
+      current_binding = current ++ [left]
       unzip_binding(rest, {current_binding, [current_binding | all]})
     end
 

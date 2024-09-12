@@ -75,7 +75,6 @@
           ## Refactoring Opportunities
           #
           {Credo.Check.Refactor.ABCSize, [files: %{excluded: ["test/support/repo/migrations/*"]}]},
-          {Credo.Check.Refactor.AppendSingleItem, []},
           {Credo.Check.Refactor.Apply, []},
           {Credo.Check.Refactor.CondStatements, []},
           {Credo.Check.Refactor.CyclomaticComplexity, []},

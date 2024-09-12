@@ -53,6 +53,7 @@ predicate -> composed_binding : {'=', {binding, '$1'}, true}.
 predicate -> negate composed_binding : {'=', {binding, '$2'}, false}.
 
 composed_binding -> binding single_pipe composed_binding : ['$1' | '$3'].
+composed_binding -> binding single_ampersand composed_binding : ['$1' | '$3'].
 composed_binding -> binding : ['$1'].
 
 binding -> identifier dot binding : [unwrap('$1') | '$3'].

@@ -30,8 +30,8 @@ Get = get
 Where = where
 Empty = :empty
 Colon = :
-SingleAmpersand = &
-SinglePipe = |
+SingleAmpersand = \&
+SinglePipe = \|
 
 Identifier        = [A-Za-z][A-Za-z0-9_]*
 FractionalPart    = \.{Digit}+

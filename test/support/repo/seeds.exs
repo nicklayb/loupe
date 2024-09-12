@@ -9,6 +9,8 @@ alias Loupe.Test.Ecto.UserExternalKey
 Application.ensure_all_started(:ecto)
 Repo.start_link()
 
+IO.puts("> Seeding database")
+
 admin_user =
   Repo.insert!(%User{
     role: %Role{slug: "admin", permissions: %{"folders" => %{"access" => "write"}}},
@@ -71,3 +73,5 @@ Repo.insert!(%User{
     }
   ]
 })
+
+IO.puts("> Database seeded")

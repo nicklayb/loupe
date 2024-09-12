@@ -31,7 +31,7 @@ defmodule Loupe.Language do
     end
   end
 
-  defp new_ast({action, quantifier, schema, predicates}) do
-    Ast.new(action, schema, quantifier, predicates)
+  defp new_ast({action, quantifier, {schema, parameters}, predicates}) do
+    Ast.new(action, schema, quantifier, predicates, parameters)
   end
 end

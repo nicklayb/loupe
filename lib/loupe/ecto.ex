@@ -137,48 +137,45 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp binding_field({:binding, path}, %Context{bindings: bindings}) do
-      {field, path, rest} =
-        case Enum.reverse(path) do
-          [{:variant, _} = variant, field | rest] ->
-            {field, variant, rest}
-
-          [{:path, _} = path, field | rest] ->
-            {field, path, rest}
-
-          [field | rest] ->
-            {field, :direct, rest}
-        end
+      {field, field_access, rest} =
+        path
+        |> Enum.reverse()
+        |> extract_field_access_type()
 
       binding =
         Enum.reduce(rest, [], fn step, accumulator ->
           [String.to_existing_atom(step) | accumulator]
         end)
 
-      {Map.fetch!(bindings, binding), String.to_existing_atom(field), path}
+      {Map.fetch!(bindings, binding), String.to_existing_atom(field), field_access}
+    end
+
+    defp extract_field_access_type([{:variant, _} = variant, field | rest]) do
+      {field, variant, rest}
+    end
+
+    defp extract_field_access_type([{:path, _} = path, field | rest]) do
+      {field, path, rest}
+    end
+
+    defp extract_field_access_type([field | rest]) do
+      {field, :direct, rest}
     end
 
     defp join_relation(query, %Context{bindings: bindings} = context) do
       context
       |> Context.sorted_bindings()
       |> Enum.reduce(query, fn {path, binding}, accumulator ->
-        join_spec = parent_binding(bindings, path)
+        {name, parent_binding} = parent_binding(bindings, path)
 
-        join_once(accumulator, binding, join_spec)
-      end)
-    end
-
-    defp join_once(query, binding, {name, parent_binding}) do
-      if has_named_binding?(query, binding) do
-        query
-      else
         join(
-          query,
+          accumulator,
           :left,
           [{^parent_binding, parent}],
           association in assoc(parent, ^name),
           as: ^binding
         )
-      end
+      end)
     end
 
     defp parent_binding(bindings, path) do

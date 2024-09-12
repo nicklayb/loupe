@@ -28,9 +28,9 @@ if Code.ensure_loaded?(Ecto) do
     set that you can find a the bottom of this file under the `@binding_keys` module
     attribute.
     """
-    defstruct [:assigns, :implementation, :root_schema, bindings: %{}]
-
     alias Loupe.Ecto.Context
+
+    defstruct [:assigns, :implementation, :root_schema, bindings: %{}]
 
     @type schema :: Ecto.Queryable.t()
     @type schemas :: %{binary() => schema()}
@@ -96,7 +96,9 @@ if Code.ensure_loaded?(Ecto) do
         {:only, fields} ->
           schema
           |> allowed_foreign_keys(fields)
-          |> then(&Kernel.++(schema.__schema__(:primary_key), &1))
+          |> then(fn fields ->
+            schema.__schema__(:primary_key) ++ fields
+          end)
           |> Enum.uniq()
       end
     end

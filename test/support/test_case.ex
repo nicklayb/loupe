@@ -10,7 +10,7 @@ defmodule Loupe.TestCase do
 
   using do
     quote do
-      import Loupe.Fixture
+      import Loupe.Test.Ecto
       import Loupe.TestCase
 
       setup [:load_schemas]

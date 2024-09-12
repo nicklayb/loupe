@@ -2,17 +2,30 @@ Terminals
 where all identifier dot boolean_operator
 list_operand like comma operand string integer
 negate open_paren close_paren float open_bracket close_bracket
-empty sigil colon.
+empty sigil colon open_curly close_curly.
 
 Nonterminals
-quantifier predicates predicate expression binding literal list inner_list string_literal path inner_path path_part.
+quantifier predicates predicate expression binding literal list 
+inner_list string_literal path inner_path path_part key_value_pair 
+schema key_value_pairs object.
 
 Rootsymbol expression.
 
-expression -> identifier quantifier identifier where predicates : {unwrap('$1'), '$2', unwrap('$3'), '$5'}.
-expression -> identifier identifier where predicates : {unwrap('$1'), {int, 1}, unwrap('$2'), '$4'}.
-expression -> identifier quantifier identifier : {unwrap('$1'), '$2', unwrap('$3'), nil}.
-expression -> identifier identifier : {unwrap('$1'), {int, 1}, unwrap('$2'), nil}.
+expression -> identifier quantifier schema where predicates : {unwrap('$1'), '$2', '$3', '$5'}.
+expression -> identifier schema where predicates : {unwrap('$1'), {int, 1}, '$2', '$4'}.
+expression -> identifier quantifier schema : {unwrap('$1'), '$2', '$3', nil}.
+expression -> identifier schema : {unwrap('$1'), {int, 1}, '$2', nil}.
+
+schema -> identifier object : {unwrap('$1'), '$2'}.
+schema -> identifier : {unwrap('$1'), nil}.
+
+object -> open_curly key_value_pairs close_curly : {object, '$2'}.
+
+key_value_pairs -> key_value_pair comma key_value_pairs : ['$1' | '$3'].
+key_value_pairs -> key_value_pair : ['$1'].
+
+key_value_pair -> identifier colon literal : {unwrap('$1'), '$3'}.
+key_value_pair -> identifier colon object : {unwrap('$1'), '$3'}.
 
 quantifier -> all : all.
 quantifier -> integer dot dot integer : {range, {unwrap('$1'), unwrap('$4')}}.

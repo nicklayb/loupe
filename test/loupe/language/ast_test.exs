@@ -35,4 +35,19 @@ defmodule Loupe.Language.AstTest do
              ] == Ast.bindings(ast)
     end
   end
+
+  describe "unwrap_literal/1" do
+    test "unwraps literals" do
+      assert "string" = Ast.unwrap_literal({:string, 'string'})
+      assert 12 = Ast.unwrap_literal({:int, 12})
+      assert 12.5 = Ast.unwrap_literal({:float, 12.5})
+      assert {:sigil, 'm', "sigil"} = Ast.unwrap_literal({:sigil, {'m', "sigil"}})
+
+      assert ["string", 12, 12.5, {:sigil, 'm', "sigil"}] =
+               Ast.unwrap_literal(
+                 {:list,
+                  [{:string, 'string'}, {:int, 12}, {:float, 12.5}, {:sigil, {'m', 'sigil'}}]}
+               )
+    end
+  end
 end

@@ -69,7 +69,13 @@ defmodule Loupe.MixProject do
 
   defp aliases do
     [
-      test: ["ecto.create --quiet -r Loupe.Test.Ecto.Repo", "ecto.migrate", "test"]
+      test: [
+        "ecto.drop",
+        "ecto.create --quiet -r Loupe.Test.Ecto.Repo",
+        "ecto.migrate",
+        "run test/support/repo/seeds.exs",
+        "test"
+      ]
     ]
   end
 end

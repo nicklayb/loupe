@@ -7,7 +7,7 @@ empty sigil colon open_curly close_curly single_ampersand single_pipe.
 Nonterminals
 quantifier predicates predicate expression binding literal list 
 inner_list string_literal path inner_path path_part key_value_pair 
-schema key_value_pairs object composed_binding.
+schema key_value_pairs object composed_binding or_binding and_binding.
 
 Rootsymbol expression.
 
@@ -52,9 +52,15 @@ predicate -> composed_binding negate empty : {unwrap('$2'), {'=', {binding, '$1'
 predicate -> composed_binding : {'=', {binding, '$1'}, true}.
 predicate -> negate composed_binding : {'=', {binding, '$2'}, false}.
 
-composed_binding -> binding single_pipe composed_binding : ['$1' | '$3'].
-composed_binding -> binding single_ampersand composed_binding : ['$1' | '$3'].
+composed_binding -> binding single_pipe or_binding : {or_binding, ['$1' | '$3']}.
+composed_binding -> binding single_ampersand and_binding : {and_binding, ['$1' | '$3']}.
 composed_binding -> binding : ['$1'].
+
+or_binding -> binding single_pipe or_binding : ['$1' | '$3'].
+or_binding -> binding : ['$1'].
+
+and_binding -> binding single_ampersand and_binding : ['$1' | '$3'].
+and_binding -> binding : ['$1'].
 
 binding -> identifier dot binding : [unwrap('$1') | '$3'].
 binding -> identifier path : [unwrap('$1'), '$2'].

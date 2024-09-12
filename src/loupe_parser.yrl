@@ -2,12 +2,12 @@ Terminals
 where all identifier dot boolean_operator
 list_operand like comma operand string integer
 negate open_paren close_paren float open_bracket close_bracket
-empty sigil colon open_curly close_curly.
+empty sigil colon open_curly close_curly single_ampersand single_pipe.
 
 Nonterminals
 quantifier predicates predicate expression binding literal list 
 inner_list string_literal path inner_path path_part key_value_pair 
-schema key_value_pairs object.
+schema key_value_pairs object composed_binding.
 
 Rootsymbol expression.
 
@@ -37,20 +37,23 @@ predicates -> open_paren predicates close_paren : '$2'.
 predicates -> predicate boolean_operator predicates : {unwrap('$2'), '$1', '$3'}.
 predicates -> predicate : '$1'.
 
-predicate -> binding negate operand literal : {unwrap('$2'), {unwrap('$3'), {binding, '$1'}, '$4'}}.
-predicate -> binding operand literal : {unwrap('$2'), {binding, '$1'}, '$3'}.
+predicate -> composed_binding negate operand literal : {unwrap('$2'), {unwrap('$3'), {binding, '$1'}, '$4'}}.
+predicate -> composed_binding operand literal : {unwrap('$2'), {binding, '$1'}, '$3'}.
 
-predicate -> binding negate list_operand list : {unwrap('$2'), {unwrap('$3'), {binding, '$1'}, '$4'}}.
-predicate -> binding list_operand list : {unwrap('$2'), {binding, '$1'}, '$3'}.
+predicate -> composed_binding negate list_operand list : {unwrap('$2'), {unwrap('$3'), {binding, '$1'}, '$4'}}.
+predicate -> composed_binding list_operand list : {unwrap('$2'), {binding, '$1'}, '$3'}.
 
-predicate -> binding negate like string_literal : {unwrap('$2'), {unwrap('$3'), {binding, '$1'}, '$4'}}.
-predicate -> binding like string_literal : {unwrap('$2'), {binding, '$1'}, '$3'}.
+predicate -> composed_binding negate like string_literal : {unwrap('$2'), {unwrap('$3'), {binding, '$1'}, '$4'}}.
+predicate -> composed_binding like string_literal : {unwrap('$2'), {binding, '$1'}, '$3'}.
 
-predicate -> binding empty : {'=', {binding, '$1'}, empty}.
-predicate -> binding negate empty : {unwrap('$2'), {'=', {binding, '$1'}, empty}}.
+predicate -> composed_binding empty : {'=', {binding, '$1'}, empty}.
+predicate -> composed_binding negate empty : {unwrap('$2'), {'=', {binding, '$1'}, empty}}.
 
-predicate -> binding : {'=', {binding, '$1'}, true}.
-predicate -> negate binding : {'=', {binding, '$2'}, false}.
+predicate -> composed_binding : {'=', {binding, '$1'}, true}.
+predicate -> negate composed_binding : {'=', {binding, '$2'}, false}.
+
+composed_binding -> binding single_pipe composed_binding : ['$1' | '$3'].
+composed_binding -> binding : ['$1'].
 
 binding -> identifier dot binding : [unwrap('$1') | '$3'].
 binding -> identifier path : [unwrap('$1'), '$2'].

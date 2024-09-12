@@ -30,6 +30,8 @@ Get = get
 Where = where
 Empty = :empty
 Colon = :
+SingleAmpersand = &
+SinglePipe = |
 
 Identifier        = [A-Za-z][A-Za-z0-9_]*
 FractionalPart    = \.{Digit}+
@@ -40,31 +42,33 @@ IntQuant          = {Integer}{Quantifier}
 
 Rules.
 
-{Whitespace}    : skip_token.
-{Terminator}    : skip_token.
-{Comma}         : {token, {comma,             TokenLine, list_to_atom(TokenChars)}}.
-{All}           : {token, {all,               TokenLine, list_to_atom(TokenChars)}}.
-{Where}         : {token, {where,             TokenLine, list_to_atom(TokenChars)}}.
-{Empty}         : {token, {empty,             TokenLine, list_to_atom(TokenChars)}}.
-{IntQuant}      : {token, {integer,           TokenLine, quantify_integer(TokenChars)}}.
-{Integer}       : {token, {integer,           TokenLine, list_to_integer(TokenChars)}}.
-{FloatValue}    : {token, {float,             TokenLine, list_to_float(TokenChars)}}.
-{Sigil}         : {token, {sigil,             TokenLine, extract_sigil(TokenChars)}}.
-{String}        : {token, {string,            TokenLine, string:trim(TokenChars, both, "\"")}}.
-{BoolOp}        : {token, {boolean_operator,  TokenLine, list_to_atom(TokenChars)}}.
-{Operand}       : {token, {operand,           TokenLine, list_to_atom(TokenChars)}}.
-{ListOperand}   : {token, {list_operand,      TokenLine, list_to_atom(TokenChars)}}.
-{LikeOperand}   : {token, {like,              TokenLine, list_to_atom(TokenChars)}}.
-{Not}           : {token, {negate,            TokenLine, list_to_atom(TokenChars)}}.
-{Dot}           : {token, {dot,               TokenLine, list_to_atom(TokenChars)}}.
-{Colon}         : {token, {colon,             TokenLine, list_to_atom(TokenChars)}}.
-{Identifier}    : {token, {identifier,        TokenLine, TokenChars}}.
-{OpenParen}     : {token, {open_paren,        TokenLine, list_to_atom(TokenChars)}}.
-{CloseParen}    : {token, {close_paren,       TokenLine, list_to_atom(TokenChars)}}.
-{OpenBracket}   : {token, {open_bracket,      TokenLine, list_to_atom(TokenChars)}}.
-{CloseBracket}  : {token, {close_bracket,     TokenLine, list_to_atom(TokenChars)}}.
-{OpenCurly}     : {token, {open_curly,        TokenLine, list_to_atom(TokenChars)}}.
-{CloseCurly}    : {token, {close_curly,       TokenLine, list_to_atom(TokenChars)}}.
+{Whitespace}       : skip_token.
+{Terminator}       : skip_token.
+{Comma}            : {token, {comma,             TokenLine, list_to_atom(TokenChars)}}.
+{All}              : {token, {all,               TokenLine, list_to_atom(TokenChars)}}.
+{Where}            : {token, {where,             TokenLine, list_to_atom(TokenChars)}}.
+{Empty}            : {token, {empty,             TokenLine, list_to_atom(TokenChars)}}.
+{IntQuant}         : {token, {integer,           TokenLine, quantify_integer(TokenChars)}}.
+{Integer}          : {token, {integer,           TokenLine, list_to_integer(TokenChars)}}.
+{FloatValue}       : {token, {float,             TokenLine, list_to_float(TokenChars)}}.
+{Sigil}            : {token, {sigil,             TokenLine, extract_sigil(TokenChars)}}.
+{String}           : {token, {string,            TokenLine, string:trim(TokenChars, both, "\"")}}.
+{BoolOp}           : {token, {boolean_operator,  TokenLine, list_to_atom(TokenChars)}}.
+{Operand}          : {token, {operand,           TokenLine, list_to_atom(TokenChars)}}.
+{ListOperand}      : {token, {list_operand,      TokenLine, list_to_atom(TokenChars)}}.
+{LikeOperand}      : {token, {like,              TokenLine, list_to_atom(TokenChars)}}.
+{Not}              : {token, {negate,            TokenLine, list_to_atom(TokenChars)}}.
+{Dot}              : {token, {dot,               TokenLine, list_to_atom(TokenChars)}}.
+{Colon}            : {token, {colon,             TokenLine, list_to_atom(TokenChars)}}.
+{Identifier}       : {token, {identifier,        TokenLine, TokenChars}}.
+{OpenParen}        : {token, {open_paren,        TokenLine, list_to_atom(TokenChars)}}.
+{CloseParen}       : {token, {close_paren,       TokenLine, list_to_atom(TokenChars)}}.
+{OpenBracket}      : {token, {open_bracket,      TokenLine, list_to_atom(TokenChars)}}.
+{CloseBracket}     : {token, {close_bracket,     TokenLine, list_to_atom(TokenChars)}}.
+{OpenCurly}        : {token, {open_curly,        TokenLine, list_to_atom(TokenChars)}}.
+{CloseCurly}       : {token, {close_curly,       TokenLine, list_to_atom(TokenChars)}}.
+{SinglePipe}       : {token, {single_pipe,       TokenLine, list_to_atom(TokenChars)}}.
+{SingleAmpersand}  : {token, {single_ampersand,  TokenLine, list_to_atom(TokenChars)}}.
 
 Erlang code.
 

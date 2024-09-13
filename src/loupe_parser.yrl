@@ -54,7 +54,7 @@ predicate -> negate composed_binding : {'=', {binding, '$2'}, false}.
 
 composed_binding -> binding single_pipe or_binding : {or_binding, ['$1' | '$3']}.
 composed_binding -> binding single_ampersand and_binding : {and_binding, ['$1' | '$3']}.
-composed_binding -> binding : ['$1'].
+composed_binding -> binding : '$1'.
 
 or_binding -> binding single_pipe or_binding : ['$1' | '$3'].
 or_binding -> binding : ['$1'].

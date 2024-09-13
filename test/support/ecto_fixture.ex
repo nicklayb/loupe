@@ -9,8 +9,6 @@ defmodule Loupe.Test.Ecto do
   because at the time of reading this file, they aren't properly compiled.
   """
 
-  import ExUnit.Assertions
-
   alias Loupe.Ecto, as: LoupeEcto
   alias Loupe.Ecto.Context
   alias Loupe.Language
@@ -148,26 +146,28 @@ defmodule Loupe.Test.Ecto do
 
   def run_query(query, options \\ []) do
     assigns = Keyword.get(options, :assigns, %{role: "admin"})
+    variables = Keyword.get(options, :variables, %{})
     preload = Keyword.get(options, :preload, [])
 
     result =
       case assigns do
         nil ->
-          LoupeEcto.build_query(query, Definition)
+          LoupeEcto.build_query(query, Definition, %{}, variables)
 
         _ ->
           LoupeEcto.build_query(
             query,
             Definition,
-            assigns
+            assigns,
+            variables
           )
       end
 
-    assert {:ok, %Ecto.Query{} = ecto_query, _context} = result
-
-    ecto_query
-    |> Repo.all()
-    |> Repo.preload(preload)
+    with {:ok, %Ecto.Query{} = ecto_query, _context} <- result do
+      ecto_query
+      |> Repo.all()
+      |> Repo.preload(preload)
+    end
   end
 
   def create_context(test_context) do

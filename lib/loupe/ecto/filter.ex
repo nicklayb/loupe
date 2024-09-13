@@ -36,10 +36,15 @@ if Code.ensure_loaded?(Ecto) do
       Enum.map(items, &unwrap(&1, context))
     end
 
+    def unwrap({:identifier, identifier}, %Context{variables: variables}) do
+      Map.fetch!(variables, identifier)
+    end
+
     def unwrap(boolean, _context) when is_boolean(boolean), do: boolean
 
     def unwrap(literal, _context) do
-      Ast.unwrap_literal(literal)
+      {unwrapped, _} = Ast.unwrap_literal(literal, MapSet.new())
+      unwrapped
     end
   end
 end

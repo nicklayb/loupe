@@ -219,6 +219,21 @@ defmodule Loupe.EctoTest do
                run_query(~s|get all User where email = "user@email.com"|, assigns: %{role: "user"})
     end
 
+    test "filter using variable" do
+      assert [
+               %User{email: "user@email.com"}
+             ] =
+               run_query(~s|get all User where email = email|,
+                 assigns: %{role: "user"},
+                 variables: %{"email" => "user@email.com"}
+               )
+    end
+
+    test "returns error if variables aren't provided" do
+      assert {:error, {:missing_variables, ["email"]}} =
+               run_query(~s|get User where email = email|)
+    end
+
     test "returns error if query field is not allowed" do
       assert {:error, {:invalid_binding, "name"}} =
                LoupeEcto.build_query(

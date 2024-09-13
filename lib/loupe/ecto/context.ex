@@ -30,7 +30,7 @@ if Code.ensure_loaded?(Ecto) do
     """
     alias Loupe.Ecto.Context
 
-    defstruct [:assigns, :implementation, :root_schema, bindings: %{}]
+    defstruct [:assigns, :implementation, :root_schema, variables: %{}, bindings: %{}]
 
     @type schema :: Ecto.Queryable.t()
     @type schemas :: %{binary() => schema()}
@@ -43,6 +43,7 @@ if Code.ensure_loaded?(Ecto) do
             assigns: assigns(),
             implementation: implementation(),
             root_schema: schema(),
+            variables: map(),
             bindings: bindings()
           }
 
@@ -52,8 +53,8 @@ if Code.ensure_loaded?(Ecto) do
     alter the definition dynamically.
     """
     @spec new(implementation(), assigns()) :: t()
-    def new(implementation, assigns) do
-      %Context{implementation: implementation, assigns: assigns}
+    def new(implementation, assigns, variables \\ %{}) do
+      %Context{implementation: implementation, assigns: assigns, variables: variables}
     end
 
     @doc "Gets implementation schemas"

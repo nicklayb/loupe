@@ -36,18 +36,31 @@ defmodule Loupe.Language.AstTest do
     end
   end
 
-  describe "unwrap_literal/1" do
+  describe "unwrap_literal/2" do
     test "unwraps literals" do
-      assert "string" = Ast.unwrap_literal({:string, 'string'})
-      assert 12 = Ast.unwrap_literal({:int, 12})
-      assert 12.5 = Ast.unwrap_literal({:float, 12.5})
-      assert {:sigil, 'm', "sigil"} = Ast.unwrap_literal({:sigil, {'m', "sigil"}})
+      assert {"string", %MapSet{}} = Ast.unwrap_literal({:string, 'string'}, MapSet.new())
+      assert {12, %MapSet{}} = Ast.unwrap_literal({:int, 12}, MapSet.new())
+      assert {12.5, %MapSet{}} = Ast.unwrap_literal({:float, 12.5}, MapSet.new())
 
-      assert ["string", 12, 12.5, {:sigil, 'm', "sigil"}] =
+      assert {{:sigil, 'm', "sigil"}, %MapSet{}} =
+               Ast.unwrap_literal({:sigil, {'m', "sigil"}}, MapSet.new())
+
+      assert {["string", 12, 12.5, {:sigil, 'm', "sigil"}], %MapSet{}} =
                Ast.unwrap_literal(
                  {:list,
-                  [{:string, 'string'}, {:int, 12}, {:float, 12.5}, {:sigil, {'m', 'sigil'}}]}
+                  [{:string, 'string'}, {:int, 12}, {:float, 12.5}, {:sigil, {'m', 'sigil'}}]},
+                 MapSet.new()
                )
+
+      assert {[{:identifier, "string"}], external_identifiers} =
+               Ast.unwrap_literal({:list, [{:identifier, 'string'}]}, MapSet.new())
+
+      assert MapSet.equal?(external_identifiers, MapSet.new(["string"]))
+
+      assert {{:identifier, "string"}, external_identifiers} =
+               Ast.unwrap_literal({:identifier, 'string'}, MapSet.new())
+
+      assert MapSet.equal?(external_identifiers, MapSet.new(["string"]))
     end
   end
 end

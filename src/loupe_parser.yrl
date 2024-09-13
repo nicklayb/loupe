@@ -63,6 +63,7 @@ literal -> float : {float, unwrap('$1')}.
 literal -> sigil : {sigil, unwrap('$1')}.
 
 string_literal -> string : {string, unwrap('$1')}.
+string_literal -> identifier : {identifier, unwrap('$1')}.
 
 path -> open_bracket inner_path close_bracket : {path, '$2'}.
 

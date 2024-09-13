@@ -227,5 +227,14 @@ defmodule Loupe.EctoTest do
                  %{role: "user"}
                )
     end
+
+    test "runs query with single pipe" do
+      assert [
+               %User{name: "Jane Doe", email: "user@email.com"}
+             ] =
+               run_query(~s<get all User where role.slug | email | name like "Jane">,
+                 assigns: %{role: "admin"}
+               )
+    end
   end
 end

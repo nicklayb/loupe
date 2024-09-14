@@ -42,10 +42,10 @@ defmodule Loupe.Language.AstTest do
       assert {12, %MapSet{}} = Ast.unwrap_literal({:int, 12}, MapSet.new())
       assert {12.5, %MapSet{}} = Ast.unwrap_literal({:float, 12.5}, MapSet.new())
 
-      assert {{:sigil, 'm', "sigil"}, %MapSet{}} =
+      assert {{:sigil, {'m', "sigil"}}, %MapSet{}} =
                Ast.unwrap_literal({:sigil, {'m', "sigil"}}, MapSet.new())
 
-      assert {["string", 12, 12.5, {:sigil, 'm', "sigil"}], %MapSet{}} =
+      assert {["string", 12, 12.5, {:sigil, {'m', "sigil"}}], %MapSet{}} =
                Ast.unwrap_literal(
                  {:list,
                   [{:string, 'string'}, {:int, 12}, {:float, 12.5}, {:sigil, {'m', 'sigil'}}]},

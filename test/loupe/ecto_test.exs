@@ -2,6 +2,7 @@ defmodule Loupe.EctoTest do
   use Loupe.TestCase, async: false
 
   alias Loupe.Ecto, as: LoupeEcto
+  alias Loupe.Ecto.Context
   alias Loupe.Test.Ecto.Post
   alias Loupe.Test.Ecto.Role
   alias Loupe.Test.Ecto.User
@@ -240,6 +241,16 @@ defmodule Loupe.EctoTest do
                  ~s|get all User where name = "John Doe"|,
                  @implementation,
                  %{role: "user"}
+               )
+    end
+
+    test "maps parameters from variables" do
+      assert {:ok, _, %Context{parameters: %{"order_by" => "-inserted_at", "value" => 1550}}} =
+               Loupe.Ecto.build_query(
+                 ~s|get User{order_by: order_by, value: ~m"15,50"} where role.slug = "admin"|,
+                 @implementation,
+                 %{role: "admin"},
+                 %{"order_by" => "-inserted_at"}
                )
     end
   end

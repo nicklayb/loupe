@@ -33,11 +33,12 @@ be found at <https://hexdocs.pm/loupe>.
 The basic syntax has the following format
 
 ```
-get [quantifier?] [schema] where [predicates]
+get [quantifier?] [schema][parameters?] where [predicates]
 ```
 
 - `quantifier` is how many records you want. You can provide a positive integer (`1`, `2`, `3` ...), a range (`1..10`, `10..20`, `50..100`) or `all`.
 - `schema` needs to be an alphanumeric indentifier that you registered in the Definition (See [Ecto Usage](#ecto-usage) for exmaple).
+- `parameters` is a json inspired map. It takes the format of `{key: "value"}`. Key is an identifier, but value can be any literal type (another object, string, int, float, boolean, list)
 - `predicates` needs to be a combinaison or operators and boolean operators.
 
 ### Cool stuff
@@ -80,6 +81,36 @@ get User where role.permissions[posts, access] = "write"
 # or
 get User where role.permissions["posts", "access"] = "write"
 ```
+
+### Variables and external identifiers
+
+#### Query variable
+
+The library allows you to provide external data to you query. Any identifier (unquote alphanumerical and underscore values) provided on the right side of an operator will be output as such. Taking for instance the Ecto implementation, it allows you to provide external parameter to the query. 
+
+A good usecase example could be to automatically provide a `user_id` based from the authenticated user. So you can use it like:
+
+```
+get Posts where author_id = user_id
+```
+
+Then when evaluating the query you make sure to provide the user id by doing
+
+```
+Loupe.Ecto.build_query(query, EctoDefinition, %{}, %{"user_id" => current_user.id})
+```
+
+*Note*: Variables in query are *required*. When evaluating if the query uses a variable that is not provided, an error will be raise.
+
+#### Parameters
+
+This variables can also be used in parameters. Suppose your implementation supports an `order_by` parameter, you can use it like
+
+```
+get Posts{order_by: {direction: direction, field: field}}
+```
+
+Unlike variables, they don't need to be provided, they are simply extract as such and it's up to you to manipulate them the way you want. For the case of the Ecto implementation, however, they do need to be implemented so they can be extracted in the returning context.
 
 ## Ecto usage
 

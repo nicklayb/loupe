@@ -42,11 +42,14 @@ if Code.ensure_loaded?(Ecto) do
     defp maybe_compile_ast(string) when is_binary(string), do: Language.compile(string)
     defp maybe_compile_ast(%Ast{} = ast), do: {:ok, ast}
 
-    defp create_query(%Ast{} = ast, %Context{} = context) do
+    defp create_query(
+           %Ast{parameters: parameters} = ast,
+           %Context{} = context
+         ) do
       with :ok <- validate_variables(ast, context),
            {:ok, context} <- put_root_schema(ast, context),
            {:ok, context} <- extract_bindings(ast, context) do
-        {:ok, to_query(ast, context), context}
+        {:ok, to_query(ast, context), Context.put_parameters(context, parameters)}
       end
     end
 

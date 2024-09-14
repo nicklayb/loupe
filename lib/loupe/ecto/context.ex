@@ -30,7 +30,14 @@ if Code.ensure_loaded?(Ecto) do
     """
     alias Loupe.Ecto.Context
 
-    defstruct [:assigns, :implementation, :root_schema, variables: %{}, bindings: %{}]
+    defstruct [
+      :assigns,
+      :implementation,
+      :root_schema,
+      variables: %{},
+      parameters: %{},
+      bindings: %{}
+    ]
 
     @type schema :: Ecto.Queryable.t()
     @type schemas :: %{binary() => schema()}
@@ -44,6 +51,7 @@ if Code.ensure_loaded?(Ecto) do
             implementation: implementation(),
             root_schema: schema(),
             variables: map(),
+            parameters: map(),
             bindings: bindings()
           }
 
@@ -75,6 +83,32 @@ if Code.ensure_loaded?(Ecto) do
         :all -> true
       end
     end
+
+    def put_parameters(%Context{} = context, parameter_map) do
+      parameters = expand_parameters(parameter_map, context)
+      %Context{context | parameters: parameters}
+    end
+
+    defp expand_parameters({:identifier, key}, %Context{variables: variables}) do
+      Map.get(variables, key)
+    end
+
+    defp expand_parameters({:sigil, {char, string}}, context) do
+      cast_sigil(context, {char, string})
+    end
+
+    defp expand_parameters(list, context) when is_list(list) do
+      Enum.map(list, &expand_parameters(&1, context))
+    end
+
+    defp expand_parameters(%{} = parameters, context) do
+      Enum.reduce(parameters, %{}, fn {key, value}, accumulator ->
+        expanded_value = expand_parameters(value, context)
+        Map.put(accumulator, key, expanded_value)
+      end)
+    end
+
+    defp expand_parameters(parameter, _), do: parameter
 
     @doc "Same as `selectable_fields/1` but for the root schema"
     @spec selectable_fields(t()) :: [atom()]

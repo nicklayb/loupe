@@ -255,6 +255,6 @@ defmodule Loupe.Language.Ast do
   end
 
   def unwrap_literal({:sigil, {char, string}}, external_identifiers) do
-    {{:sigil, char, to_string(string)}, external_identifiers}
+    {{:sigil, {char, to_string(string)}}, external_identifiers}
   end
 end

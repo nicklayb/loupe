@@ -60,7 +60,7 @@ if Code.ensure_loaded?(Ecto) do
     will be passed down to the implementation during to query building process to
     alter the definition dynamically.
     """
-    @spec new(implementation(), assigns()) :: t()
+    @spec new(implementation(), assigns(), map()) :: t()
     def new(implementation, assigns, variables \\ %{}) do
       %Context{implementation: implementation, assigns: assigns, variables: variables}
     end

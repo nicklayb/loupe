@@ -84,6 +84,8 @@ if Code.ensure_loaded?(Ecto) do
       end
     end
 
+    @doc "Puts parameters compiling sigils and assigning variables"
+    @spec put_parameters(t(), map()) :: t()
     def put_parameters(%Context{} = context, parameter_map) do
       parameters = expand_parameters(parameter_map, context)
       %Context{context | parameters: parameters}

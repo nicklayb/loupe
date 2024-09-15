@@ -77,6 +77,7 @@ defmodule Loupe.Language.Ast do
   @type predicate ::
           {boolean_operator(), predicate(), predicate()}
           | {operand(), binding(), literal()}
+          | {:not, {operand(), binding(), literal()}}
           | nil
 
   @typedoc "Query quantifier to limit the query result count"
@@ -122,14 +123,14 @@ defmodule Loupe.Language.Ast do
           {nil, MapSet.new()}
       end
 
-    {predicates, external_identifiers} = walk_predicates(predicates, external_identifiers)
+    {predicates, updated_external_identifiers} = walk_predicates(predicates, external_identifiers)
 
     %Ast{
       action: to_string(action),
       quantifier: quantifier,
       predicates: predicates,
       schema: to_string(binding),
-      external_identifiers: external_identifiers,
+      external_identifiers: updated_external_identifiers,
       parameters: parameters
     }
   end
@@ -143,9 +144,13 @@ defmodule Loupe.Language.Ast do
 
   defp walk_predicates({operand, left, right}, external_identifiers)
        when is_operand(operand) or is_text_operand(operand) or is_boolean_operator(operand) do
-    {left_predicates, external_identifiers} = walk_predicates(left, external_identifiers)
-    {right_predicates, external_identifiers} = walk_predicates(right, external_identifiers)
-    {{operand, left_predicates, right_predicates}, external_identifiers}
+    {left_predicates, after_left_external_identifiers} =
+      walk_predicates(left, external_identifiers)
+
+    {right_predicates, updated_external_identifiers} =
+      walk_predicates(right, after_left_external_identifiers)
+
+    {{operand, left_predicates, right_predicates}, updated_external_identifiers}
   end
 
   defp walk_predicates({:binding, value} = binding, external_identifiers) when is_list(value) do

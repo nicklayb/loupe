@@ -208,6 +208,33 @@ defmodule Loupe.LanguageTest do
               }} = Language.compile(@case)
     end
 
+    @case ~s|get User{order: {direction: direction, field: field}} where age > 50|
+    test "supports parameterized schema with variables" do
+      assert {:ok,
+              %Ast{
+                predicates: {:>, {:binding, ["age"]}, {:int, 50}},
+                parameters: %{
+                  "order" => %{
+                    "direction" => {:identifier, "direction"},
+                    "field" => {:identifier, "field"}
+                  }
+                }
+              }} = Language.compile(@case)
+    end
+
+    @case ~s|get User where age > age and role.slug = role_slug|
+    test "supports variables in predicates" do
+      assert {:ok,
+              %Ast{
+                predicates:
+                  {:and, {:>, {:binding, ["age"]}, {:identifier, "age"}},
+                   {:=, {:binding, ["role", "slug"]}, {:identifier, "role_slug"}}},
+                external_identifiers: external_identifiers
+              }} = Language.compile(@case)
+
+      assert MapSet.equal?(external_identifiers, MapSet.new(["age", "role_slug"]))
+    end
+
     @failing_case ~s|get User where name = "d|
     test "intercepts raise errors" do
       assert {:error, %Loupe.Errors.LexerError{line: 1, message: {:illegal, '"d'}}} =

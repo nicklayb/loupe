@@ -32,20 +32,36 @@ if Code.ensure_loaded?(Ecto) do
     Builds an Ecto query from either an AST or a string. It requires an implementation
     of the Loupe.Ecto.Definition behaviour and supports assigns as a third parameter.
     """
-    @spec build_query(Ast.t() | binary(), Context.implementation(), map()) ::
+    @spec build_query(Ast.t() | binary(), Context.implementation(), map(), map()) ::
             {:ok, Ecto.Query.t(), Context.t()} | {:error, build_query_error()}
 
-    def build_query(string_or_ast, implementation, assigns) do
-      build_query(string_or_ast, Context.new(implementation, assigns))
+    def build_query(string_or_ast, implementation, assigns, variables \\ %{}) do
+      build_query(string_or_ast, Context.new(implementation, assigns, variables))
     end
 
     defp maybe_compile_ast(string) when is_binary(string), do: Language.compile(string)
     defp maybe_compile_ast(%Ast{} = ast), do: {:ok, ast}
 
-    defp create_query(%Ast{} = ast, %Context{} = context) do
-      with {:ok, context} <- put_root_schema(ast, context),
+    defp create_query(
+           %Ast{parameters: parameters} = ast,
+           %Context{} = context
+         ) do
+      with :ok <- validate_variables(ast, context),
+           {:ok, context} <- put_root_schema(ast, context),
            {:ok, context} <- extract_bindings(ast, context) do
-        {:ok, to_query(ast, context), context}
+        {:ok, to_query(ast, context), Context.put_parameters(context, parameters)}
+      end
+    end
+
+    defp validate_variables(%Ast{external_identifiers: external_identifiers}, %Context{
+           variables: variables
+         }) do
+      case Enum.split_with(external_identifiers, &Map.has_key?(variables, &1)) do
+        {_, []} ->
+          :ok
+
+        {_, missing_variables} ->
+          {:error, {:missing_variables, missing_variables}}
       end
     end
 

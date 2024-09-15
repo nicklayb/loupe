@@ -37,7 +37,16 @@ defmodule Loupe.Language.Ast do
   """
   alias Loupe.Language.Ast
 
-  defstruct [:action, :quantifier, :predicates, :schema, :parameters]
+  defstruct [
+    :action,
+    :quantifier,
+    :predicates,
+    :schema,
+    :parameters,
+    external_identifiers: MapSet.new()
+  ]
+
+  @type external_identifiers :: MapSet.t(String.t())
 
   @typedoc "Range from one value to another"
   @type range :: {integer(), integer()}
@@ -48,6 +57,7 @@ defmodule Loupe.Language.Ast do
           | {:int, integer()}
           | {:string, binary()}
           | {:sigil, binary()}
+          | {:identifier, binary()}
 
   @typedoc "Alpha identifier"
   @type alpha_identifier :: charlist()
@@ -67,6 +77,7 @@ defmodule Loupe.Language.Ast do
   @type predicate ::
           {boolean_operator(), predicate(), predicate()}
           | {operand(), binding(), literal()}
+          | {:not, {operand(), binding(), literal()}}
           | nil
 
   @typedoc "Query quantifier to limit the query result count"
@@ -83,6 +94,7 @@ defmodule Loupe.Language.Ast do
           quantifier: quantifier(),
           schema: binary(),
           predicates: predicate(),
+          external_identifiers: external_identifiers(),
           parameters: parameters()
         }
 
@@ -102,65 +114,84 @@ defmodule Loupe.Language.Ast do
   @spec new(alpha_identifier(), alpha_identifier(), quantifier(), predicate(), object() | nil) ::
           t()
   def new(action, binding, quantifier, predicates, parameters \\ nil) do
-    parameters =
+    {parameters, external_identifiers} =
       case parameters do
         {:object, _} ->
-          unwrap_literal(parameters)
+          unwrap_literal(parameters, MapSet.new())
 
         _ ->
-          nil
+          {nil, MapSet.new()}
       end
+
+    {predicates, updated_external_identifiers} = walk_predicates(predicates, external_identifiers)
 
     %Ast{
       action: to_string(action),
       quantifier: quantifier,
-      predicates: walk_predicates(predicates),
+      predicates: predicates,
       schema: to_string(binding),
+      external_identifiers: updated_external_identifiers,
       parameters: parameters
     }
   end
 
-  defp walk_predicates(nil), do: nil
+  defp walk_predicates(nil, external_identifiers), do: {nil, external_identifiers}
 
-  defp walk_predicates({:not, expression}) do
-    {:not, walk_predicates(expression)}
+  defp walk_predicates({:not, expression}, external_identifiers) do
+    {predicates, external_identifiers} = walk_predicates(expression, external_identifiers)
+    {{:not, predicates}, external_identifiers}
   end
 
-  defp walk_predicates({operand, left, right})
-       when is_operand(operand) or is_text_operand(operand) do
-    {operand, walk_predicates(left), walk_predicates(right)}
+  defp walk_predicates({operand, left, right}, external_identifiers)
+       when is_operand(operand) or is_text_operand(operand) or is_boolean_operator(operand) do
+    {left_predicates, after_left_external_identifiers} =
+      walk_predicates(left, external_identifiers)
+
+    {right_predicates, updated_external_identifiers} =
+      walk_predicates(right, after_left_external_identifiers)
+
+    {{operand, left_predicates, right_predicates}, updated_external_identifiers}
   end
 
-  defp walk_predicates({boolean_operator, left, right})
-       when is_boolean_operator(boolean_operator) do
-    {boolean_operator, walk_predicates(left), walk_predicates(right)}
+  defp walk_predicates({:binding, value} = binding, external_identifiers) when is_list(value) do
+    {map_binding(binding), external_identifiers}
   end
 
-  defp walk_predicates({:binding, value} = binding) when is_list(value) do
-    map_binding(binding)
+  defp walk_predicates({:list, elements}, external_identifiers) when is_list(elements) do
+    {list_elements, external_identifiers} =
+      Enum.reduce(elements, {[], external_identifiers}, fn element,
+                                                           {accumulated_elements,
+                                                            external_identifiers} ->
+        {walked_element, external_identifiers} = walk_predicates(element, external_identifiers)
+        {[walked_element | accumulated_elements], external_identifiers}
+      end)
+
+    {{:list, Enum.reverse(list_elements)}, external_identifiers}
   end
 
-  defp walk_predicates({:list, elements}) when is_list(elements) do
-    {:list, Enum.map(elements, &walk_predicates/1)}
+  defp walk_predicates({:string, value}, external_identifiers) do
+    {{:string, to_string(value)}, external_identifiers}
   end
 
-  defp walk_predicates({:string, value}) do
-    {:string, to_string(value)}
+  defp walk_predicates({:sigil, {char, value}}, external_identifiers) do
+    {{:sigil, {char, to_string(value)}}, external_identifiers}
   end
 
-  defp walk_predicates({:sigil, {char, value}}) do
-    {:sigil, {char, to_string(value)}}
+  defp walk_predicates(boolean, external_identifiers) when is_boolean(boolean) do
+    {boolean, external_identifiers}
   end
 
-  defp walk_predicates(boolean) when is_boolean(boolean) do
-    boolean
+  defp walk_predicates({:identifier, value}, external_identifiers) do
+    string_value = to_string(value)
+    {{:identifier, string_value}, MapSet.put(external_identifiers, string_value)}
   end
 
-  defp walk_predicates({literal, value}) when is_literal(literal) do
-    {literal, value}
+  defp walk_predicates({literal, value}, external_identifiers) when is_literal(literal) do
+    {{literal, value}, external_identifiers}
   end
 
-  defp walk_predicates(reserved) when is_reserved_keyword(reserved), do: reserved
+  defp walk_predicates(reserved, external_identifiers) when is_reserved_keyword(reserved),
+    do: {reserved, external_identifiers}
 
   defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &map_binary_part/1)}
 
@@ -193,19 +224,42 @@ defmodule Loupe.Language.Ast do
   defp extract_bindings(_, accumulator), do: accumulator
 
   @doc "Unwraps literal"
-  @spec unwrap_literal(literal() | object()) :: any()
-  def unwrap_literal({:object, pairs}) do
-    Enum.reduce(pairs, %{}, fn {key, value}, accumulator ->
-      Map.put(accumulator, to_string(key), unwrap_literal(value))
+  @spec unwrap_literal(literal() | object(), external_identifiers()) ::
+          {any(), external_identifiers()}
+  def unwrap_literal({:object, pairs}, external_identifiers) do
+    Enum.reduce(pairs, {%{}, external_identifiers}, fn {key, value},
+                                                       {accumulator, external_identifiers} ->
+      {unwrapped_value, external_identifiers} = unwrap_literal(value, external_identifiers)
+      accumulator = Map.put(accumulator, to_string(key), unwrapped_value)
+      {accumulator, external_identifiers}
     end)
   end
 
-  def unwrap_literal({:string, string}), do: to_string(string)
-  def unwrap_literal({:int, int}), do: int
-  def unwrap_literal({:float, float}), do: float
-  def unwrap_literal({:list, list}), do: Enum.map(list, &unwrap_literal/1)
+  def unwrap_literal({:string, string}, external_identifiers),
+    do: {to_string(string), external_identifiers}
 
-  def unwrap_literal({:sigil, {char, string}}) do
-    {:sigil, char, to_string(string)}
+  def unwrap_literal({:int, int}, external_identifiers), do: {int, external_identifiers}
+  def unwrap_literal({:float, float}, external_identifiers), do: {float, external_identifiers}
+
+  def unwrap_literal({:identifier, identifier}, external_identifiers) do
+    string_identifier = to_string(identifier)
+    {{:identifier, string_identifier}, MapSet.put(external_identifiers, string_identifier)}
+  end
+
+  def unwrap_literal({:list, list}, external_identifiers) do
+    {unwrapped_list, external_identifiers} =
+      Enum.reduce(list, {[], external_identifiers}, fn list_item,
+                                                       {unwrapped_items, external_identifiers} ->
+        {unwrapped_list_item, external_identifiers} =
+          unwrap_literal(list_item, external_identifiers)
+
+        {[unwrapped_list_item | unwrapped_items], external_identifiers}
+      end)
+
+    {Enum.reverse(unwrapped_list), external_identifiers}
+  end
+
+  def unwrap_literal({:sigil, {char, string}}, external_identifiers) do
+    {{:sigil, {char, to_string(string)}}, external_identifiers}
   end
 end

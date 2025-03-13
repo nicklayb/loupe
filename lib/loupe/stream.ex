@@ -23,36 +23,38 @@ defmodule Loupe.Stream do
 
   The following example will filter records whose age is greater than 18
 
-      iex> Loupe.Stream.query(~s|get A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get A where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
       ...>   %{age: 6},
       ...>   %{age: 34},
       ...> ])
+      iex> Enum.to_list(stream)
       [%{age: 76}]
 
   The same parsing rules applies here, so only one record is returned because 
   when quantifier is provided, it defaults to 1. One could use `all` to 
   get all the records that are matching or a range.
 
-
-      iex> Loupe.Stream.query(~s|get all A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get all A where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
       ...>   %{age: 6},
       ...>   %{age: 34},
       ...> ])
+      iex> Enum.to_list(stream)
       [%{age: 76}, %{age: 28}, %{age: 34}]
 
-      iex> Loupe.Stream.query(~s|get 2..3 A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get 2..3 A where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
       ...>   %{age: 6},
       ...>   %{age: 34},
       ...> ])
+      iex> Enum.to_list(stream)
       [%{age: 28}, %{age: 34}]
 
   ### Overriding query's limit
@@ -60,14 +62,32 @@ defmodule Loupe.Stream do
   In case you wanna enforce a limit of your own to the stream and don't wanna
   depend on the query's `quantifier`, you can pass `limit?: false` to the function
 
-      iex> Loupe.Stream.query(~s|get 1 A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get 1 A where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
       ...>   %{age: 6},
       ...>   %{age: 34},
       ...> ], limit?: false)
+      iex> Enum.to_list(stream)
       [%{age: 76}, %{age: 28}, %{age: 34}]
+
+  ### Using variables
+
+  You can provide variables to your query with the `variables` option. Keys
+  must be string to match what is decoded from the query.
+
+
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get 1 A where age > adult|, [
+      ...>   %{age: 76},
+      ...>   %{age: 13},
+      ...>   %{age: 28},
+      ...>   %{age: 6},
+      ...>   %{age: 34},
+      ...> ], limit?: false, variables: %{"adult" => 18})
+      iex> Enum.to_list(stream)
+      [%{age: 76}, %{age: 28}, %{age: 34}]
+
   """
   @spec query(String.t() | Ast.t(), Enumerable.t(), [option()]) ::
           {:ok, Enumerable.t()} | {:error, build_query_error()}

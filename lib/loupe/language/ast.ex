@@ -71,14 +71,20 @@ defmodule Loupe.Language.Ast do
   @typedoc "Valid boolean operators"
   @type boolean_operator :: :or | :and
 
+  @typedoc "Json like object decoded"
   @type object :: {:object, [{binary(), literal() | object()}]}
+
+  @typedoc "Operator structure"
+  @type operator :: {operand(), binding(), literal()}
+
+  @typedoc "Negated operator"
+  @type negated_operator :: {:not, operator()}
 
   @typedoc "Validation composed predicates"
   @type predicate ::
           {boolean_operator(), predicate(), predicate()}
-          | {operand(), binding(), literal()}
-          | {:not, {operand(), binding(), literal()}}
-          | nil
+          | operator()
+          | negated_operator()
 
   @typedoc "Query quantifier to limit the query result count"
   @type quantifier :: :all | {:int, integer()} | {:range, range()}
@@ -93,7 +99,7 @@ defmodule Loupe.Language.Ast do
           action: binary(),
           quantifier: quantifier(),
           schema: binary(),
-          predicates: predicate(),
+          predicates: predicate() | nil,
           external_identifiers: external_identifiers(),
           parameters: parameters()
         }

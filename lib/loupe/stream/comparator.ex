@@ -23,6 +23,8 @@ defmodule Loupe.Stream.Comparator do
     not compare(operand, element, context)
   end
 
+  # TODO: Take care for cases where we have lists in there
+  # TODO: Figure a way to treat tuples
   def compare(operand, element, %Context{comparator: comparator} = context) do
     operand_with_values =
       operand

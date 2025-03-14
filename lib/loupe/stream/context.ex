@@ -39,7 +39,7 @@ defmodule Loupe.Stream.Context do
 
   @doc "Puts variable in context"
   @spec put_variables(t(), map()) :: t()
-  def put_variables(%Context{} = context, variables) do
-    %Context{context | variables: variables}
+  def put_variables(%Context{variables: variables} = context, new_variables) do
+    %Context{context | variables: Map.merge(variables, new_variables)}
   end
 end

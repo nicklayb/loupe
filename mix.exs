@@ -2,7 +2,7 @@ defmodule Loupe.MixProject do
   use Mix.Project
 
   @github "https://github.com/nicklayb/loupe"
-  @version "0.9.0"
+  @version "VERSION" |> File.read!() |> String.trim()
 
   def project do
     [

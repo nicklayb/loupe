@@ -1,6 +1,9 @@
 defmodule Loupe.Stream.DefaultComparator do
   @moduledoc """
   Default comparator that does strict comparison.
+
+  The default comparator does not implement any kind of
+  variant casting or sigil conversion.
   """
   @behaviour Loupe.Stream.Comparator
 
@@ -49,4 +52,10 @@ defmodule Loupe.Stream.DefaultComparator do
 
     left_downcase =~ right_downcase
   end
+
+  @impl Loupe.Stream.Comparator
+  def apply_variant(value, _), do: value
+
+  @impl Loupe.Stream.Comparator
+  def cast_sigil(_char, value), do: value
 end

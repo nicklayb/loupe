@@ -131,11 +131,16 @@ defmodule Loupe.Language.Ast do
 
     {predicates, updated_external_identifiers} = walk_predicates(predicates, external_identifiers)
 
+    schema =
+      with binary when is_list(binary) <- binding do
+        to_string(binary)
+      end
+
     %Ast{
       action: to_string(action),
       quantifier: quantifier,
       predicates: predicates,
-      schema: to_string(binding),
+      schema: schema,
       external_identifiers: updated_external_identifiers,
       parameters: parameters
     }

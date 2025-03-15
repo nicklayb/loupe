@@ -15,6 +15,8 @@ expression -> identifier quantifier schema where predicates : {unwrap('$1'), '$2
 expression -> identifier schema where predicates : {unwrap('$1'), {int, 1}, '$2', '$4'}.
 expression -> identifier quantifier schema : {unwrap('$1'), '$2', '$3', nil}.
 expression -> identifier schema : {unwrap('$1'), {int, 1}, '$2', nil}.
+expression -> identifier where predicates : {unwrap('$1'), {int, 1}, {nil, nil}, '$3'}.
+expression -> identifier quantifier where predicates : {unwrap('$1'), '$2', {nil, nil}, '$4'}.
 
 schema -> identifier object : {unwrap('$1'), '$2'}.
 schema -> identifier : {unwrap('$1'), nil}.

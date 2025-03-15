@@ -16,14 +16,14 @@ defmodule Loupe.Stream do
   Queries a stream using an AST or a Query. The returned result will
   be an enumerable function to be executed with `Enum` functions.
 
-  For stream queries, the Schema is unused, up to you to perform pre-filtering
-  or put a static one in place if you want.
+  For stream queries, the Schema is unused, up to you to perform 
+  pre-filtering, put a static one in place or omit it.
 
   ## Examples
 
   The following example will filter records whose age is greater than 18
 
-      iex> {:ok, stream} = Loupe.Stream.query(~s|get A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
@@ -37,7 +37,7 @@ defmodule Loupe.Stream do
   when quantifier is provided, it defaults to 1. One could use `all` to 
   get all the records that are matching or a range.
 
-      iex> {:ok, stream} = Loupe.Stream.query(~s|get all A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get all where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
@@ -47,7 +47,7 @@ defmodule Loupe.Stream do
       iex> Enum.to_list(stream)
       [%{age: 76}, %{age: 28}, %{age: 34}]
 
-      iex> {:ok, stream} = Loupe.Stream.query(~s|get 2..3 A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get 2..3 where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
@@ -62,7 +62,7 @@ defmodule Loupe.Stream do
   In case you wanna enforce a limit of your own to the stream and don't wanna
   depend on the query's `quantifier`, you can pass `limit?: false` to the function
 
-      iex> {:ok, stream} = Loupe.Stream.query(~s|get 1 A where age > 18|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get 1 where age > 18|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},
@@ -78,7 +78,7 @@ defmodule Loupe.Stream do
   must be string to match what is decoded from the query.
 
 
-      iex> {:ok, stream} = Loupe.Stream.query(~s|get 1 A where age > adult|, [
+      iex> {:ok, stream} = Loupe.Stream.query(~s|get 1 where age > adult|, [
       ...>   %{age: 76},
       ...>   %{age: 13},
       ...>   %{age: 28},

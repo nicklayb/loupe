@@ -36,6 +36,7 @@
     ],
     "state": "open",
     "locked": false,
+    "random_float": 2.4,
     "assignee": null,
     "assignees": [
 
@@ -88,6 +89,7 @@
     "id": 2527192788,
     "node_id": "I_kwDOJIsQ-M6WoebU",
     "number": 28,
+    "random_float": 8.1,
     "title": "Make dialyzer pass",
     "user": {
       "login": "nicklayb",
@@ -577,6 +579,7 @@
     },
     "timeline_url": "https://api.github.com/repos/nicklayb/loupe/issues/10/timeline",
     "performed_via_github_app": null,
-    "state_reason": null
+    "state_reason": null,
+    "only_valid_here": "hello"
   }
 ]

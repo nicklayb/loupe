@@ -101,4 +101,21 @@ defmodule Loupe.Stream.DefaultComparatorTest do
       refute DefaultComparator.compare({:in, 5, [1, 2, 6]})
     end
   end
+
+  describe "apply_variant/2" do
+    test "noop for variants" do
+      Enum.each([1, 2.2, true, "hello", %{}], fn value ->
+        assert value == DefaultComparator.apply_variant(value, "something")
+      end)
+    end
+  end
+
+  describe "cast_sigil/2" do
+    test "noop for sigils" do
+      Enum.each([1, 2.2, true, "hello", %{}], fn value ->
+        random_char = [Enum.random(?a..?z)]
+        assert value == DefaultComparator.cast_sigil(random_char, value)
+      end)
+    end
+  end
 end

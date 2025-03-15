@@ -19,6 +19,16 @@ defmodule Loupe.LanguageTest do
     test "compiles a different action" do
       assert {:ok, %Ast{action: "ecto"}} = Language.compile(@case)
     end
+
+    @case ~s|get where email = "user@email.com"|
+    test "supports query without schema" do
+      assert {:ok, %Ast{quantifier: {:int, 1}, schema: nil}} = Language.compile(@case)
+    end
+
+    @case ~s|get 12 where email = "user@email.com"|
+    test "supports query without schema but with quantifier" do
+      assert {:ok, %Ast{quantifier: {:int, 12}, schema: nil}} = Language.compile(@case)
+    end
   end
 
   describe "compile/1 quantifier" do

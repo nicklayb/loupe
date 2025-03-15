@@ -1,6 +1,13 @@
 defmodule Loupe.Stream.Comparator do
   @moduledoc """
-  Behaviour to implement comparator.
+  Behaviour to implement comparator. It could be useful to
+  implement your own comparator to alter how fields are getting
+  compared. 
+
+  Overriding the comparator can allow someone to implement
+  variant casting (exmaple `field:upper` to uppercase values
+  automatically), alter the comparison logic or implement
+  sigil casting.
   """
 
   alias Loupe.Language.Ast
@@ -8,6 +15,17 @@ defmodule Loupe.Stream.Comparator do
 
   @doc "Compares a stream's value with a literal value"
   @callback compare(Loupe.Language.Ast.operator()) :: boolean()
+
+  @doc """
+  Applies a field variant on a value. This can be used to have
+  expression like `value:upper` be automatically uppercased.
+  """
+  @callback apply_variant(any(), String.t()) :: any()
+
+  @doc """
+  Casts a sigil to kind of value to be compared.
+  """
+  @callback cast_sigil(char(), String.t()) :: any()
 
   @doc "Compares predicates inside a given map/structure tree"
   @spec compare(Ast.predicate(), any(), Context.t()) :: boolean()
@@ -52,10 +70,6 @@ defmodule Loupe.Stream.Comparator do
     Map.get(variables, identifier)
   end
 
-  defp compare_value(operand, elements, context) when is_tuple(elements) do
-    compare_value(operand, Tuple.to_list(elements), context)
-  end
-
   defp compare_value(_operand, [], _context) do
     :empty
   end
@@ -70,7 +84,7 @@ defmodule Loupe.Stream.Comparator do
          %Context{comparator: comparator} = context
        ) do
     result =
-      case {get_value(element, binding), rest_bindings} do
+      case {get_value(element, binding, context), rest_bindings} do
         {{:ok, value}, []} ->
           {operator, value, right}
 
@@ -86,14 +100,22 @@ defmodule Loupe.Stream.Comparator do
     end
   end
 
-  defp get_value(map, key) when is_map(map) do
+  defp get_value(nil, _, _) do
+    {:error, :not_map}
+  end
+
+  defp get_value(value, {:variant, variant}, %Context{comparator: comparator}) do
+    {:ok, comparator.apply_variant(value, variant)}
+  end
+
+  defp get_value(map, key, _) when is_map(map) do
     with :error <- Map.fetch(map, key),
          :error <- fetch_atom_key(map, key) do
       {:error, :key_missing}
     end
   end
 
-  defp get_value(_, _), do: {:error, :not_map}
+  defp get_value(_, _, _), do: {:error, :not_map}
 
   defp fetch_atom_key(map, string) do
     key = String.to_existing_atom(string)

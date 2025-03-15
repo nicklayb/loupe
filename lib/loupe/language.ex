@@ -21,7 +21,7 @@ defmodule Loupe.Language do
   def compile(charlist) do
     with {:ok, tokens, _} <- :loupe_lexer.string(charlist),
          {:ok, ast} <- :loupe_parser.parse(tokens) do
-      {:ok, new_ast(ast)}
+      new_ast(ast)
     else
       {:error, {line, :loupe_parser, messages}} ->
         {:error, %ParserError{line: line, message: messages}}
@@ -32,6 +32,6 @@ defmodule Loupe.Language do
   end
 
   defp new_ast({action, quantifier, {schema, parameters}, predicates}) do
-    Ast.new(action, schema, quantifier, predicates, parameters)
+    {:ok, Ast.new(action, schema, quantifier, predicates, parameters)}
   end
 end

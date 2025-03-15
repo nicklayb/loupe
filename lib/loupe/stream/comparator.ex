@@ -20,18 +20,22 @@ defmodule Loupe.Stream.Comparator do
   end
 
   def compare({:not, operand}, element, %Context{} = context) do
-    not compare(operand, element, context)
+    case compute_expression(operand, element, context) do
+      :empty -> false
+      other -> not other
+    end
   end
 
-  # TODO: Take care for cases where we have lists in there
-  # TODO: Figure a way to treat tuples
-  def compare(operand, element, %Context{comparator: comparator} = context) do
-    operand_with_values =
-      operand
-      |> fill_values(element, context)
-      |> unwrap_right_value(context)
+  def compare(operand, element, %Context{} = context) do
+    with :empty <- compute_expression(operand, element, context) do
+      false
+    end
+  end
 
-    comparator.compare(operand_with_values)
+  defp compute_expression(operand, element, %Context{} = context) do
+    operand
+    |> unwrap_right_value(context)
+    |> compare_value(element, context)
   end
 
   defp unwrap_right_value({operator, left, right}, context) do
@@ -48,16 +52,37 @@ defmodule Loupe.Stream.Comparator do
     Map.get(variables, identifier)
   end
 
-  defp fill_values({_ = operator, {:binding, [binding | rest_bindings]}, right}, element, context) do
-    case {get_value(element, binding), rest_bindings} do
-      {{:ok, value}, []} ->
-        {operator, value, right}
+  defp compare_value(operand, elements, context) when is_tuple(elements) do
+    compare_value(operand, Tuple.to_list(elements), context)
+  end
 
-      {{:ok, value}, _} ->
-        fill_values({operator, {:binding, rest_bindings}, right}, value, context)
+  defp compare_value(_operand, [], _context) do
+    :empty
+  end
 
-      {{:error, _}, _} ->
-        {operator, nil, right}
+  defp compare_value(operand, elements, context) when is_list(elements) do
+    Enum.any?(elements, &compare_value(operand, &1, context))
+  end
+
+  defp compare_value(
+         {_ = operator, {:binding, [binding | rest_bindings]}, right},
+         element,
+         %Context{comparator: comparator} = context
+       ) do
+    result =
+      case {get_value(element, binding), rest_bindings} do
+        {{:ok, value}, []} ->
+          {operator, value, right}
+
+        {{:ok, value}, _} ->
+          compare_value({operator, {:binding, rest_bindings}, right}, value, context)
+
+        {{:error, _}, _} ->
+          {operator, nil, right}
+      end
+
+    with {_, _, _} <- result do
+      comparator.compare(result)
     end
   end
 

@@ -3,6 +3,7 @@ defmodule Loupe.EctoTest do
 
   alias Loupe.Ecto, as: LoupeEcto
   alias Loupe.Ecto.Context
+  alias Loupe.Ecto.Errors.MissingSchemaError
   alias Loupe.Test.Ecto.Post
   alias Loupe.Test.Ecto.Role
   alias Loupe.Test.Ecto.User
@@ -252,6 +253,11 @@ defmodule Loupe.EctoTest do
                  %{role: "admin"},
                  %{"order_by" => "-inserted_at"}
                )
+    end
+
+    test "queries without schemas are returning an error" do
+      assert {:error, %MissingSchemaError{}} ==
+               Loupe.Ecto.build_query(~s|get where name = "John"|, @implementation)
     end
   end
 end

@@ -5,14 +5,16 @@ if Code.ensure_loaded?(Ecto) do
     should be completely decoupled from any Repo logic and leave that to the app's Repo
     """
     import Ecto.Query
+
     alias Loupe.Ecto.Context
+    alias Loupe.Ecto.Errors.MissingSchemaError
     alias Loupe.Ecto.Filter
     alias Loupe.Language
     alias Loupe.Language.Ast
 
     @root_binding :root
 
-    @type build_query_error :: any()
+    @type build_query_error :: MissingSchemaError.t() | any()
 
     @doc "Same as build_query/2 but with context or with implementation with no assigns"
     @spec build_query(Ast.t() | binary(), Context.implementation() | Context.t()) ::
@@ -41,6 +43,10 @@ if Code.ensure_loaded?(Ecto) do
 
     defp maybe_compile_ast(string) when is_binary(string), do: Language.compile(string)
     defp maybe_compile_ast(%Ast{} = ast), do: {:ok, ast}
+
+    defp create_query(%Ast{schema: nil}, %Context{}) do
+      {:error, %MissingSchemaError{}}
+    end
 
     defp create_query(
            %Ast{parameters: parameters} = ast,

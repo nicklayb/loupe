@@ -333,6 +333,10 @@ if Code.ensure_loaded?(Phoenix.Component) do
       end
     end
 
-    defp internal_key?(key), do: String.starts_with?(to_string(key), "__")
+    defp internal_key?(key) do
+      key
+      |> to_string()
+      |> String.starts_with?("__")
+    end
   end
 end

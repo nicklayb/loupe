@@ -13,20 +13,18 @@ Until Loupe reaches `1.x.x`, it's considered experimental. The syntax will chang
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+Loupe is [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `loupe` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:loupe, "~> 0.1.0"}
+    {:loupe, "~> 0.10.0"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/loupe>.
+Thhe documentation can be found at <https://hexdocs.pm/loupe>.
 
 ## Syntax
 
@@ -37,7 +35,7 @@ get [quantifier?] [schema][parameters?] where [predicates]
 ```
 
 - `quantifier` is how many records you want. You can provide a positive integer (`1`, `2`, `3` ...), a range (`1..10`, `10..20`, `50..100`) or `all`.
-- `schema` needs to be an alphanumeric indentifier that you registered in the Definition (See [Ecto Usage](#ecto-usage) for exmaple).
+- `schema` can be an alphanumeric indentifier that you registered in the Definition (See [Ecto Usage](#ecto-usage) for exmaple). The schema is required only for Ecto usage.
 - `parameters` is a json inspired map. It takes the format of `{key: "value"}`. Key is an identifier, but value can be any literal type (another object, string, int, float, boolean, list)
 - `predicates` needs to be a combinaison or operators and boolean operators.
 
@@ -156,16 +154,36 @@ Once you have this definition, you can try some queries
 Repo.all(ecto_query)
 ```
 
+## Stream / Enumerable
+
+Support has been added to filter streams or enumerable.
+
+The same features applies and some more extra;
+
+- You can use a quantifier to limit the stream (`get 3 ...`)
+- You can override the whole comparison logic
+- You can use field variant as "modifier" through a custom `Loupe.Stream.Comparator` implementation.
+- You can use sigil for more complex comparison
+
+### Example
+
+```elixir
+posts = [
+  %{title: "My post", comments: [%{comment: "Boring!", author: "Homer Simpsons"}]},
+  %{title: "My second post", comments: [%{comment: "Respect my authorita!", author: "Eric Cartman"}]},
+]
+{:ok, stream} = Loupe.Stream.query(~s|get where comments.author like "Eric"|, posts)
+[%{title: "My second posts"}] = Enum.to_list(stream)
+```
+
 ## Todo
 
 Here are some things that I would like Loupe to support:
 
-- Sorting a query, current ideas involves
-  - `get all User order asc inserted_at`
-  - `get all User where age > 10 ordered asc inserted_at`.
-- Support some more complex fields prefixed by ~ (or whatever syntax, inspired by elixir's sigils) like the examples below
-  - `get all Product where price = ~99.99$` and have that use the Elixir money lib.
-  - `get all Item where ratio = ~1/4`
+- ~Sorting a query, current ideas involves~
+  - This can be achieve with a parameter like `get User{order_by: "age"} where ...` and be handled manually by your application
+- ~Support some more complex fields prefixed by ~ (or whatever syntax, inspired by elixir's sigils) like the examples below~
+  - This has been implemented. Field variants can be used for composite fields and sigil can be used for expresions.
 - Implement a LiveView UI lib that shows the strucutres as expandable. Being able to click on a User's `posts` to automatically preload all of its nested Posts.
   - Also have "block" UI module where you can simply create a query from dropdowns in a form for non-power user.
 - Make lexer and parser swappable. Right now, you are stuck with the internal structure that I came up with. The idea would be to allow some to swap the syntax for anything they want. For instance, a french team could implement a french query language to give to their normal user.

@@ -2,13 +2,13 @@ defmodule Loupe.MixProject do
   use Mix.Project
 
   @github "https://github.com/nicklayb/loupe"
-  @version "0.9.0"
+  @version "VERSION" |> File.read!() |> String.trim()
 
   def project do
     [
       app: :loupe,
       version: @version,
-      elixir: "~> 1.12",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -58,7 +58,7 @@ defmodule Loupe.MixProject do
       {:phoenix_live_view, "~> 0.18", optional: true},
       {:ecto, "~> 3.11", optional: true},
       {:ecto_sql, "~> 3.11", optional: true},
-      {:credo, "~> 1.6.7", only: [:dev, :test]},
+      {:credo, "~> 1.7.11", only: [:dev, :test]},
       {:excoveralls, "~> 0.16", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},

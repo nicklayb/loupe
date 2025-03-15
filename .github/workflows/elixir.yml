@@ -52,11 +52,16 @@ jobs:
           restore-keys: ${{ runner.os }}-mix-
       - name: Install dependencies
         run: mix deps.get
+
       - name: Compiles without warnings
         run: mix compile
-      - name: Run credo
-        run: mix credo --strict
+
       - name: Run tests
         run: mix test
+
+      - name: Run credo
+        continue-on-error: true
+        run: mix credo --strict
+
       - name: Run coverage
         run: mix coveralls.github

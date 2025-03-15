@@ -58,7 +58,7 @@ defmodule Loupe.MixProject do
       {:phoenix_live_view, "~> 0.18", optional: true},
       {:ecto, "~> 3.11", optional: true},
       {:ecto_sql, "~> 3.11", optional: true},
-      {:credo, "~> 1.6.7", only: [:dev, :test]},
+      {:credo, "~> 1.7.11", only: [:dev, :test]},
       {:excoveralls, "~> 0.16", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},

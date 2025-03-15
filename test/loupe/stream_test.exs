@@ -41,7 +41,7 @@ defmodule Loupe.StreamTest do
                    %{"name" => "enhancement"},
                    %{"name" => "implementation"}
                  ]
-               },
+               }
              ] = Enum.to_list(stream)
 
       assert [

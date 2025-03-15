@@ -59,7 +59,6 @@ defmodule Loupe.Stream.DefaultComparatorTest do
       refute DefaultComparator.compare({:<, 5, 5})
       refute DefaultComparator.compare({:<, 5.0, 3.1})
       refute DefaultComparator.compare({:<, 5.0, 5.0})
-
     end
 
     test "compares with <=" do
@@ -81,7 +80,7 @@ defmodule Loupe.Stream.DefaultComparatorTest do
       assert DefaultComparator.compare({:like, "left", "LEFT"})
       assert DefaultComparator.compare({:like, "LEFT", "left"})
       assert DefaultComparator.compare({:like, 2112, 2112})
-      assert DefaultComparator.compare({:like, 5211245, 2112})
+      assert DefaultComparator.compare({:like, 5_211_245, 2112})
       assert DefaultComparator.compare({:like, 3.1415, 3.1415})
       assert DefaultComparator.compare({:like, 3.1415, 14})
       assert DefaultComparator.compare({:like, true, "ru"})

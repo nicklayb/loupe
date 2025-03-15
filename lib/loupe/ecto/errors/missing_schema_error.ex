@@ -1,5 +1,5 @@
 defmodule Loupe.Ecto.Errors.MissingSchemaError do
-  @moduledoc "An error that occured in the lexer's step"
+  @moduledoc "Error that occurs when to schema is provided but is expected"
   defexception []
 
   alias Loupe.Ecto.Errors.MissingSchemaError

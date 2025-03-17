@@ -13,7 +13,12 @@ defmodule Loupe.Stream.DefaultComparator do
   def compare({_, nil, _}), do: false
 
   def compare({operator, atom, value}) when is_atom(atom) and not is_boolean(atom) do
-    compare({operator, to_string(atom), value})
+    string =
+      atom
+      |> to_string()
+      |> String.replace(~r/^Elixir\./, "")
+
+    compare({operator, string, value})
   end
 
   def compare({:=, left, right}) do

@@ -31,7 +31,7 @@ Where = where
 Empty = :empty
 Colon = :
 
-Identifier        = [A-Za-z][A-Za-z0-9_]*
+Identifier        = [A-Za-z_][A-Za-z0-9_]*
 FractionalPart    = \.{Digit}+
 FloatRationalPart = {NegativeSign}?{Digit}+
 FloatValue        = {FloatRationalPart}{FractionalPart}

@@ -28,6 +28,14 @@ defmodule Loupe.StreamTest do
              |> File.read!()
              |> Jason.decode!()
 
+  @data [
+    %{name: "Alex Lifeson", instruments: [%{name: "Guitar"}]},
+    %{
+      name: "Geddy Lee",
+      instruments: [%{name: "Bass"}, %{name: "Synthesizer"}, %{name: "Voice"}]
+    },
+    %{name: "Neil Peart", instruments: [%{name: "Drums"}, %{name: "Lyrics"}]}
+  ]
   describe "query/3" do
     setup [:create_stream]
 
@@ -135,14 +143,6 @@ defmodule Loupe.StreamTest do
       assert [%{"number" => 29}] = Enum.to_list(stream)
     end
 
-    @data [
-      %{name: "Alex Lifeson", instruments: [%{name: "Guitar"}]},
-      %{
-        name: "Geddy Lee",
-        instruments: [%{name: "Bass"}, %{name: "Synthesizer"}, %{name: "Voice"}]
-      },
-      %{name: "Neil Peart", instruments: [%{name: "Drums"}, %{name: "Lyrics"}]}
-    ]
     @tag [
       query: ~s|get where instruments.name = "Drums"|,
       data: @data
@@ -163,6 +163,19 @@ defmodule Loupe.StreamTest do
       end)
 
       assert [] = Enum.to_list(stream)
+    end
+
+    @tag [
+      query: ~s|get where date.__struct__ = "DateTime"|,
+      data: [
+        %{date: ~D[2025-01-01]},
+        %{date: ~N[2025-01-01 08:10:00Z]},
+        %{date: ~U[2025-01-01 08:10:00Z]},
+        %{date: nil}
+      ]
+    ]
+    test "supports field starting with underscore", %{stream: stream} do
+      assert [%{date: %DateTime{}}] = Enum.to_list(stream)
     end
   end
 

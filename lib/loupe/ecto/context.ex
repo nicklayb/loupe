@@ -28,6 +28,8 @@ if Code.ensure_loaded?(Ecto) do
     set that you can find a the bottom of this file under the `@binding_keys` module
     attribute.
     """
+    import Loupe.Language.Ast, only: [is_composed_binding: 1]
+
     alias Loupe.Ecto.Context
 
     defstruct [
@@ -209,6 +211,10 @@ if Code.ensure_loaded?(Ecto) do
     def put_bindings(%Context{root_schema: root_schema} = context, bindings) do
       Enum.reduce_while(bindings, {:ok, context}, fn binding, {:ok, accumulator} ->
         case validate_binding(accumulator, root_schema, binding, []) do
+          {:ok, [list | _] = composed_bindings} when is_list(list) ->
+            new_accumulator = Enum.reduce(composed_bindings, accumulator, &put_binding(&2, &1))
+            {:cont, {:ok, new_accumulator}}
+
           {:ok, atom_binding} ->
             {:cont, {:ok, put_binding(accumulator, atom_binding)}}
 
@@ -245,6 +251,19 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp unzip_binding([], {_, all}), do: all
+
+    defp validate_binding(%Context{} = context, schema, {composed_binding, bindings}, accumulator)
+         when is_composed_binding(composed_binding) do
+      Enum.reduce_while(bindings, {:ok, []}, fn binding, {:ok, accumulated_bindings} ->
+        case validate_binding(context, schema, binding, accumulator) do
+          {:ok, validated_binding} ->
+            {:cont, {:ok, [validated_binding | accumulated_bindings]}}
+
+          {:error, _} = error ->
+            {:halt, error}
+        end
+      end)
+    end
 
     defp validate_binding(%Context{} = context, schema, [binding, {:path, _}], accumulator) do
       validate_binding(context, schema, [binding], accumulator)

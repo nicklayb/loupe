@@ -109,12 +109,14 @@ defmodule Loupe.Language.Ast do
   @boolean_operators ~w(or and)a
   @literals ~w(string int float)a
   @reserved_keywords ~w(empty)a
+  @composed_bindings ~w(or_binding and_binding)a
 
   defguardp is_operand(operand) when operand in @operands
   defguardp is_text_operand(operand) when operand in @text_operands
   defguardp is_boolean_operator(boolean_operator) when boolean_operator in @boolean_operators
   defguardp is_literal(literal) when literal in @literals
   defguardp is_reserved_keyword(reserved_keyword) when reserved_keyword in @reserved_keywords
+  defguard is_composed_binding(composed_binding) when composed_binding in @composed_bindings
 
   @doc "Instanciates the AST"
   @spec new(alpha_identifier(), alpha_identifier(), quantifier(), predicate(), object() | nil) ::
@@ -180,6 +182,15 @@ defmodule Loupe.Language.Ast do
     {{:list, Enum.reverse(list_elements)}, external_identifiers}
   end
 
+  defp walk_predicates({:binding, {composed_binding, _}} = binding)
+       when is_composed_binding(composed_binding) do
+    map_binding(binding)
+  end
+
+  defp walk_predicates({:binding, value} = binding) when is_list(value) do
+    map_binding(binding)
+  end
+
   defp walk_predicates({:string, value}, external_identifiers) do
     {{:string, to_string(value)}, external_identifiers}
   end
@@ -204,7 +215,18 @@ defmodule Loupe.Language.Ast do
   defp walk_predicates(reserved, external_identifiers) when is_reserved_keyword(reserved),
     do: {reserved, external_identifiers}
 
-  defp map_binding({:binding, value}), do: {:binding, Enum.map(value, &map_binary_part/1)}
+  defp map_binding({:binding, {composed_binding, value}})
+       when is_composed_binding(composed_binding) do
+    value =
+      Enum.map(value, fn binding ->
+        Enum.map(binding, &map_binary_part/1)
+      end)
+
+    {:binding, {composed_binding, value}}
+  end
+
+  defp map_binding({:binding, value}),
+    do: {:binding, Enum.map(value, &map_binary_part/1)}
 
   defp map_binary_part({:variant, variant}), do: {:variant, to_string(variant)}
 

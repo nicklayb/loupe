@@ -259,5 +259,13 @@ defmodule Loupe.EctoTest do
       assert {:error, %MissingSchemaError{}} ==
                Loupe.Ecto.build_query(~s|get where name = "John"|, @implementation)
     end
+    test "runs query with single pipe" do
+      assert [
+               %User{name: "Jane Doe", email: "user@email.com"}
+             ] =
+               run_query(~s<get all User where role.slug | email | name like "Jane">,
+                 assigns: %{role: "admin"}
+               )
+    end
   end
 end

@@ -218,7 +218,9 @@ defmodule Loupe.EctoTest do
       assert [
                %User{name: nil, email: "user@email.com"}
              ] =
-               run_query(~s|get all User where email = "user@email.com"|, assigns: %{role: "user"})
+               run_query(~s|get all User where email = "user@email.com"|,
+                 assigns: %{role: "user"}
+               )
     end
 
     test "filter using variable" do
@@ -259,11 +261,31 @@ defmodule Loupe.EctoTest do
       assert {:error, %MissingSchemaError{}} ==
                Loupe.Ecto.build_query(~s|get where name = "John"|, @implementation)
     end
+
     test "runs query with single pipe" do
+      values = [
+        "Jane Doe",
+        "user@email.com",
+        "janedoe"
+      ]
+
+      Enum.each(values, fn value ->
+        assert [
+                 %User{name: "Jane Doe", email: "user@email.com"}
+               ] =
+                 run_query(
+                   ~s<get all User where user_external_keys.external_key.external_id | email | name = "#{value}">,
+                   assigns: %{role: "admin"}
+                 )
+      end)
+    end
+
+    test "runs query with single ampersand" do
       assert [
                %User{name: "Jane Doe", email: "user@email.com"}
              ] =
-               run_query(~s<get all User where role.slug | email | name like "Jane">,
+               run_query(
+                 ~s<get all User where user_external_keys.external_key.external_id & name like "jane">,
                  assigns: %{role: "admin"}
                )
     end

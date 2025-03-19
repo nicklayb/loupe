@@ -8,7 +8,7 @@ if Code.ensure_loaded?(Ecto) do
     """
     use Loupe.Ecto.Filter
 
-    alias Loupe.Ecto.OperatorError
+    alias Loupe.Ecto.Errors.OperatorError
 
     @impl Loupe.Ecto.Filter
     def apply_bounded_filter({:!=, {binding_name, field, {:path, json_path}}, value}, context) do

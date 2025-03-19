@@ -78,8 +78,32 @@ defmodule Loupe.Stream.Comparator do
     Enum.any?(elements, &compare_value(operand, &1, context))
   end
 
+  defp compare_value({operator, {:binding, {:or_binding, bindings}}, right}, element, context) do
+    Enum.any?(bindings, fn binding ->
+      compare_value({operator, {:binding, binding}, right}, element, context)
+    end)
+  end
+
+  defp compare_value({operator, {:binding, {:and_binding, bindings}}, right}, element, context) do
+    Enum.all?(bindings, fn binding ->
+      compare_value({operator, {:binding, binding}, right}, element, context)
+    end)
+  end
+
   defp compare_value(
-         {_ = operator, {:binding, [binding | rest_bindings]}, right},
+         {operator, {:binding, [{:path, paths} | rest_bindings]}, right},
+         element,
+         context
+       ) do
+    compare_value(
+      {operator, {:binding, paths ++ rest_bindings}, right},
+      element,
+      context
+    )
+  end
+
+  defp compare_value(
+         {operator, {:binding, [binding | rest_bindings]}, right},
          element,
          %Context{comparator: comparator} = context
        ) do

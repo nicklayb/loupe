@@ -164,6 +164,32 @@ defmodule Loupe.StreamTest do
 
       assert [] = Enum.to_list(stream)
     end
+
+    @tag [
+      query: ~s|get where reactions["+1"] = 1|
+    ]
+    test "filters using path", %{stream: stream} do
+      assert [%{"number" => 26}] = Enum.to_list(stream)
+    end
+
+    @tag [
+      query: ~s<get all where created_at & updated_at like "2025-03-13">
+    ]
+    test "filters with a single ampersand", %{stream: stream} do
+      assert [
+               %{"number" => 29}
+             ] = Enum.to_list(stream)
+    end
+
+    @tag [
+      query: ~s<get all where reactions["+1"] | reactions["-1"] = 1>
+    ]
+    test "filters with a single pipe", %{stream: stream} do
+      assert [
+               %{"number" => 28},
+               %{"number" => 26}
+             ] = Enum.to_list(stream)
+    end
   end
 
   defp create_stream(context) do

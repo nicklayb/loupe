@@ -2,7 +2,7 @@ defmodule Loupe.MixProject do
   use Mix.Project
 
   @github "https://github.com/nicklayb/loupe"
-  @version "0.10.1"
+  @version "0.11.0"
 
   def project do
     [
@@ -12,6 +12,7 @@ defmodule Loupe.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      docs: docs(),
       aliases: aliases(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
@@ -46,6 +47,49 @@ defmodule Loupe.MixProject do
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      extras: ["README.md"],
+      groups_for_modules: groups_for_modules(),
+      filter_modules: ~r/^((?!Test).)*$/
+    ]
+  end
+
+  defp groups_for_modules do
+    [
+      Internal: [
+        Loupe.Language,
+        Loupe.Language.Ast
+      ],
+      Ecto: [
+        Loupe.Ecto,
+        Loupe.Ecto.Context,
+        Loupe.Ecto.Definition,
+        Loupe.Ecto.Filter,
+        Loupe.Ecto.Filter.CompositeVariant,
+        Loupe.Ecto.Filter.Direct,
+        Loupe.Ecto.Filter.JsonPath
+      ],
+      Stream: [
+        Loupe.Stream,
+        Loupe.Stream.Comparator,
+        Loupe.Stream.Context,
+        Loupe.Stream.DefaultComparator
+      ],
+      PhoenixLiveView: [
+        Loupe.PhoenixLiveView.LiveComponent,
+        Loupe.PhoenixLiveView.Renderer
+      ],
+      Errors: [
+        Loupe.Ecto.Errors.MissingSchemaError,
+        Loupe.Ecto.Errors.OperatorError,
+        Loupe.Errors.LexerError,
+        Loupe.Errors.ParserError
+      ]
     ]
   end
 

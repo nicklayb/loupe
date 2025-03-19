@@ -182,13 +182,13 @@ defmodule Loupe.Language.Ast do
     {{:list, Enum.reverse(list_elements)}, external_identifiers}
   end
 
-  defp walk_predicates({:binding, {composed_binding, _}} = binding)
+  defp walk_predicates({:binding, {composed_binding, _}} = binding, external_identifiers)
        when is_composed_binding(composed_binding) do
-    map_binding(binding)
+    {map_binding(binding), external_identifiers}
   end
 
-  defp walk_predicates({:binding, value} = binding) when is_list(value) do
-    map_binding(binding)
+  defp walk_predicates({:binding, value} = binding, external_identifiers) when is_list(value) do
+    {map_binding(binding), external_identifiers}
   end
 
   defp walk_predicates({:string, value}, external_identifiers) do

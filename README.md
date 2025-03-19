@@ -19,7 +19,7 @@ by adding `loupe` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:loupe, "~> 0.10.0"}
+    {:loupe, "~> 0.11.0"}
   ]
 end
 ```
@@ -60,7 +60,17 @@ For boolean, the binding can be provided as is and prefixed by `not` for false. 
 
 ### Boolean Operators
 
-So far, the syntax supprts `and` and `or` and use parenthese to scope the expressions.
+So far, the syntax supprts `and` and `or` and use parenthese to scope the expressions. Multiple `or` and `and` operations can be grouped together using single ampersand `&` and single pipe `|`, example:
+
+```
+get User where name | email | username | alternate_name like "John"
+```
+
+This is equivalent to
+
+```
+get User where name like "Jonh" or email like "John" or username like "John" or altername_name like "John"
+```
 
 ### Field variant
 

@@ -100,7 +100,6 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp filter_query(query, %Ast{predicates: predicates}, context) do
-      IO.inspect(predicates, label: "Predicates")
       conditions = apply_filter(predicates, context)
 
       from(query, where: ^conditions)
@@ -125,7 +124,6 @@ if Code.ensure_loaded?(Ecto) do
         {composed_binding, bindings} ->
           bindings
           |> Enum.map(&{:not, {operand, {:binding, &1}, value}})
-          |> IO.inspect(label: "Clauses")
           |> build_composed_query(context, composed_binding)
 
         {_, _, _} = binding_path ->
@@ -138,7 +136,6 @@ if Code.ensure_loaded?(Ecto) do
         {composed_binding, bindings} ->
           bindings
           |> Enum.map(&{operand, {:binding, &1}, value})
-          |> IO.inspect(label: "Clauses")
           |> build_composed_query(context, composed_binding)
 
         {_, _, _} = binding_path ->
@@ -177,13 +174,11 @@ if Code.ensure_loaded?(Ecto) do
 
     defp binding_type({_, {_, _, type}, _}), do: type
 
-    defp binding_field({:binding, {:or_binding, bindings}}, context) do
-      bindings = Enum.map(bindings, fn binding -> binding_field({:binding, binding}, context) end)
+    defp binding_field({:binding, {:or_binding, bindings}}, _context) do
       {:or_binding, bindings}
     end
 
-    defp binding_field({:binding, {:and_binding, bindings}}, context) do
-      bindings = Enum.map(bindings, fn binding -> binding_field({:binding, binding}, context) end)
+    defp binding_field({:binding, {:and_binding, bindings}}, _context) do
       {:and_binding, bindings}
     end
 

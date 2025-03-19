@@ -59,13 +59,13 @@ defmodule Loupe.Ecto.Filter.JsonPathTest do
     end
 
     test "queries using like operator" do
-      assert_raise(Loupe.Ecto.OperatorError, fn ->
+      assert_raise(Loupe.Ecto.Errors.OperatorError, fn ->
         run_query(~s|get all User where role.permissions["folders", "access"] like "on"|)
       end)
     end
 
     test "queries using not like operator" do
-      assert_raise(Loupe.Ecto.OperatorError, fn ->
+      assert_raise(Loupe.Ecto.Errors.OperatorError, fn ->
         run_query(~s|get all User where role.permissions["folders", "access"] not like "ead"|)
       end)
     end

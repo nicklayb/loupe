@@ -44,7 +44,7 @@
     "milestone": null,
     "comments": 0,
     "created_at": "2025-03-13T00:38:16Z",
-    "updated_at": "2025-03-14T02:34:19Z",
+    "updated_at": "2025-03-13T02:34:19Z",
     "closed_at": null,
     "author_association": "OWNER",
     "sub_issues_summary": {
@@ -147,7 +147,7 @@
       "url": "https://api.github.com/repos/nicklayb/loupe/issues/28/reactions",
       "total_count": 0,
       "+1": 0,
-      "-1": 0,
+      "-1": 1,
       "laugh": 0,
       "hooray": 0,
       "confused": 0,
@@ -225,7 +225,7 @@
     "reactions": {
       "url": "https://api.github.com/repos/nicklayb/loupe/issues/26/reactions",
       "total_count": 0,
-      "+1": 0,
+      "+1": 1,
       "-1": 0,
       "laugh": 0,
       "hooray": 0,

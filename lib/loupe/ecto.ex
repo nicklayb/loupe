@@ -120,13 +120,41 @@ if Code.ensure_loaded?(Ecto) do
     end
 
     defp apply_filter({:not, {operand, binding, value}}, context) do
-      binding_path = binding_field(binding, context)
-      apply_bounded_filter({:not, {operand, binding_path, value}}, context)
+      case binding_field(binding, context) do
+        {composed_binding, bindings} ->
+          bindings
+          |> Enum.map(&{:not, {operand, {:binding, &1}, value}})
+          |> build_composed_query(context, composed_binding)
+
+        {_, _, _} = binding_path ->
+          apply_bounded_filter({:not, {operand, binding_path, value}}, context)
+      end
     end
 
     defp apply_filter({operand, binding, value}, context) do
-      binding_path = binding_field(binding, context)
-      apply_bounded_filter({operand, binding_path, value}, context)
+      case binding_field(binding, context) do
+        {composed_binding, bindings} ->
+          bindings
+          |> Enum.map(&{operand, {:binding, &1}, value})
+          |> build_composed_query(context, composed_binding)
+
+        {_, _, _} = binding_path ->
+          apply_bounded_filter({operand, binding_path, value}, context)
+      end
+    end
+
+    defp build_composed_query(clauses, context, :or_binding) do
+      Enum.reduce(clauses, dynamic([_], false), fn clause, query ->
+        filtered_query = apply_filter(clause, context)
+        dynamic([_], ^query or ^filtered_query)
+      end)
+    end
+
+    defp build_composed_query(clauses, context, :and_binding) do
+      Enum.reduce(clauses, dynamic([_], true), fn clause, query ->
+        filtered_query = apply_filter(clause, context)
+        dynamic([_], ^query and ^filtered_query)
+      end)
     end
 
     defp apply_bounded_filter(ast, context) do
@@ -142,9 +170,17 @@ if Code.ensure_loaded?(Ecto) do
       end
     end
 
-    defp binding_type({:not, {_, {_, _, type}, _}}), do: type
+    defp binding_type({:not, inner_ast}), do: binding_type(inner_ast)
 
     defp binding_type({_, {_, _, type}, _}), do: type
+
+    defp binding_field({:binding, {:or_binding, bindings}}, _context) do
+      {:or_binding, bindings}
+    end
+
+    defp binding_field({:binding, {:and_binding, bindings}}, _context) do
+      {:and_binding, bindings}
+    end
 
     defp binding_field({:binding, [field, {:variant, variant}]}, _context) do
       {:root, String.to_existing_atom(field), {:variant, variant}}
@@ -158,7 +194,7 @@ if Code.ensure_loaded?(Ecto) do
       {:root, String.to_existing_atom(field), :direct}
     end
 
-    defp binding_field({:binding, path}, %Context{bindings: bindings}) do
+    defp binding_field({:binding, path}, %Context{bindings: bindings}) when is_list(path) do
       {field, field_access, rest} =
         path
         |> Enum.reverse()

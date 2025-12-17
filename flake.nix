@@ -25,8 +25,8 @@
           ];
 
           shellHook = ''
-            export MIX_HOME=./.nix-mix
-            export HEX_HOME=./.nix-hex
+            export MIX_HOME=$PWD/.nix-mix
+            export HEX_HOME=$PWD/.nix-hex
             mix deps.get
 
           '';

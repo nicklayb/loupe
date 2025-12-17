@@ -30,3 +30,6 @@ loupe-*.tar
 database.db*
 
 src/*.erl
+
+.nix-mix
+.nix-hex

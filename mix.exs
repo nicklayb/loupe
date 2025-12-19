@@ -99,6 +99,7 @@ defmodule Loupe.MixProject do
 
   defp deps do
     [
+      {:assertions, "~> 0.20", only: :test},
       {:phoenix_live_view, "~> 0.18", optional: true},
       {:ecto, "~> 3.11", optional: true},
       {:ecto_sql, "~> 3.11", optional: true},

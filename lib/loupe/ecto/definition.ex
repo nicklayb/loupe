@@ -61,26 +61,26 @@ if Code.ensure_loaded?(Ecto) do
       get_fields_options = Keyword.take(options, [:assigns])
       accumulator = Keyword.get(options, :accumulator, %{})
 
-      {root_field_set, accumulator} =
+      {root_field_set, updated_accumulator} =
         fetch_field_set(definition, accumulator, root_schema_key, get_fields_options)
 
-      Enum.reduce_while(field_path, {root_field_set, accumulator}, fn field,
-                                                                      {current_field_set,
-                                                                       accumulator} ->
+      Enum.reduce_while(field_path, {root_field_set, updated_accumulator}, fn field,
+                                                                              {current_field_set,
+                                                                               current_accumulator} ->
         case get_insensitive(current_field_set.associations, field) do
           nil ->
-            {:halt, {@empty_field_set, accumulator}}
+            {:halt, {@empty_field_set, current_accumulator}}
 
           child_schema ->
-            {new_field_set, updated_accumulator} =
+            {new_field_set, new_current_accumulator} =
               fetch_field_set(
                 definition,
-                accumulator,
+                current_accumulator,
                 child_schema,
                 get_fields_options
               )
 
-            {:cont, {new_field_set, updated_accumulator}}
+            {:cont, {new_field_set, new_current_accumulator}}
         end
       end)
     end

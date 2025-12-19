@@ -46,9 +46,9 @@ defmodule Loupe.Test.Ecto do
 
       field(:price, Money.Ecto.Composite.Type)
 
-      belongs_to(:moderator, User)
+      belongs_to(:moderator, Loupe.Test.Ecto.User)
 
-      has_many(:comments, Comment)
+      has_many(:comments, Loupe.Test.Ecto.Comment)
     end
   end
 
@@ -82,12 +82,12 @@ defmodule Loupe.Test.Ecto do
       field(:active, :boolean)
       field(:bank_account, :integer)
 
-      has_many(:posts, Post)
+      has_many(:posts, Loupe.Test.Ecto.Post)
       has_many(:user_external_keys, Module.concat(["Loupe", "Test", "Ecto", "UserExternalKey"]))
 
       has_many(:external_keys, through: [:user_external_keys, :external_key])
 
-      belongs_to(:role, Role)
+      belongs_to(:role, Loupe.Test.Ecto.Role)
     end
   end
 
@@ -96,8 +96,8 @@ defmodule Loupe.Test.Ecto do
     use Ecto.Schema
 
     schema("user_external_keys") do
-      belongs_to(:external_key, ExternalKey)
-      belongs_to(:user, User)
+      belongs_to(:external_key, Loupe.Test.Ecto.ExternalKey)
+      belongs_to(:user, Loupe.Test.Ecto.User)
     end
   end
 

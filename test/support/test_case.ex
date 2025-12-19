@@ -13,6 +13,8 @@ defmodule Loupe.TestCase do
       import Loupe.Test.Ecto
       import Loupe.TestCase
 
+      require Assertions
+
       setup [:load_schemas]
     end
   end

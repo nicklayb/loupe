@@ -45,5 +45,77 @@ if Code.ensure_loaded?(Ecto) do
 
     @doc "Casts a sigil to another literal"
     @callback cast_sigil(char(), binary(), Context.assigns()) :: any()
+
+    @doc "Extracts the fiels and associations of a schema."
+    @spec get_fields(module(), Context.schema()) :: %{
+            fields: [atom()],
+            associations: %{atom() => String.t()}
+          }
+    def get_fields(definition, schema, assigns \\ %{}) do
+      schemas = definition.schemas(assigns)
+      visible_fields = definition.schema_fields(schema, assigns)
+
+      %{
+        fields: extract_fields(schema, visible_fields),
+        associations: extract_associations(schemas, schema, visible_fields)
+      }
+    end
+
+    defp extract_fields(schema, visible_fields) do
+      :fields
+      |> schema.__schema__()
+      |> filter_visible(visible_fields)
+      |> then(&(&1 ++ extract_embeds(schema, visible_fields)))
+    end
+
+    defp extract_embeds(schema, visible_fields) do
+      :embeds
+      |> schema.__schema__()
+      |> filter_visible(visible_fields)
+    end
+
+    defp extract_associations(schemas, schema, visible_fields) do
+      :associations
+      |> schema.__schema__()
+      |> filter_visible(visible_fields)
+      |> Enum.reduce(%{}, fn association, acc ->
+        relation_entity = schema.__schema__(:association, association)
+
+        case find_allowed_schema(schemas, relation_entity) do
+          nil -> acc
+          name -> Map.put(acc, association, name)
+        end
+      end)
+    end
+
+    defp find_allowed_schema(schemas, %Ecto.Association.HasThrough{} = through) do
+      find_allowed_schema(schemas, %{queryable: find_through_schema(through)})
+    end
+
+    defp find_allowed_schema(schemas, assoc) do
+      queryable = find_through_schema(assoc)
+
+      Enum.find_value(schemas, fn {key, value} ->
+        if value == queryable, do: key
+      end)
+    end
+
+    defp find_through_schema(%Ecto.Association.HasThrough{owner: owner, through: through}) do
+      Enum.reduce(through, owner, fn association, acc ->
+        :association
+        |> acc.__schema__(association)
+        |> find_through_schema()
+      end)
+    end
+
+    defp find_through_schema(%{queryable: queryable}) do
+      queryable
+    end
+
+    defp filter_visible(all, :all), do: all
+
+    defp filter_visible(all, {:only, subset}) do
+      Enum.filter(all, &(&1 in subset))
+    end
   end
 end

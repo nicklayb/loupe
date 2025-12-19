@@ -2,7 +2,7 @@ defmodule Loupe.MixProject do
   use Mix.Project
 
   @github "https://github.com/nicklayb/loupe"
-  @version "0.11.1"
+  @version "0.11.2"
 
   def project do
     [

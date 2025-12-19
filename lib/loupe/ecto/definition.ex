@@ -46,12 +46,80 @@ if Code.ensure_loaded?(Ecto) do
     @doc "Casts a sigil to another literal"
     @callback cast_sigil(char(), binary(), Context.assigns()) :: any()
 
+    @type definition_module :: module()
+
+    @type field_set :: %{associations: %{atom() => String.t()}, fields: [atom()]}
+
+    @empty_field_set %{associations: %{}, fields: []}
+
+    @type get_field_at_option :: {:assigns, Context.assigns()} | {:accumulator, %{}}
+
+    @spec get_field_at(definition_module(), String.t(), [atom()] | [String.t()], [
+            get_field_at_option()
+          ]) :: {field_set, map()}
+    def get_field_at(definition, root_schema_key, field_path, options \\ []) do
+      get_fields_options = Keyword.take(options, [:assigns])
+      accumulator = Keyword.get(options, :accumulator, %{})
+
+      {root_field_set, updated_accumulator} =
+        fetch_field_set(definition, accumulator, root_schema_key, get_fields_options)
+
+      Enum.reduce_while(field_path, {root_field_set, updated_accumulator}, fn field,
+                                                                              {current_field_set,
+                                                                               current_accumulator} ->
+        case get_insensitive(current_field_set.associations, field) do
+          nil ->
+            {:halt, {@empty_field_set, current_accumulator}}
+
+          child_schema ->
+            {new_field_set, new_current_accumulator} =
+              fetch_field_set(
+                definition,
+                current_accumulator,
+                child_schema,
+                get_fields_options
+              )
+
+            {:cont, {new_field_set, new_current_accumulator}}
+        end
+      end)
+    end
+
+    defp get_insensitive(associations, association) do
+      Enum.find_value(associations, fn {key, value} ->
+        if to_string(key) == association, do: value
+      end)
+    end
+
+    defp fetch_field_set(definition, accumulator, schema, options) do
+      case Map.get(accumulator, schema) do
+        nil ->
+          field_set = get_fields(definition, schema, options)
+          {field_set, Map.put(accumulator, schema, field_set)}
+
+        field_set ->
+          {field_set, accumulator}
+      end
+    end
+
+    @type get_fields_option :: {:assigns, Context.assigns()}
+
     @doc "Extracts the fiels and associations of a schema."
-    @spec get_fields(module(), Context.schema()) :: %{
-            fields: [atom()],
-            associations: %{atom() => String.t()}
-          }
-    def get_fields(definition, schema, assigns \\ %{}) do
+    @spec get_fields(definition_module(), Context.schema(), [get_fields_option()]) :: field_set()
+    def get_fields(definition, schema, options \\ [])
+
+    def get_fields(definition, schema, options) when is_binary(schema) do
+      schema_module =
+        options
+        |> Keyword.get(:assigns, %{})
+        |> definition.schemas()
+        |> Map.fetch!(schema)
+
+      get_fields(definition, schema_module, options)
+    end
+
+    def get_fields(definition, schema, options) when is_atom(schema) do
+      assigns = Keyword.get(options, :assigns, %{})
       schemas = definition.schemas(assigns)
       visible_fields = definition.schema_fields(schema, assigns)
 

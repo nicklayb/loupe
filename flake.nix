@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
   outputs =
@@ -15,14 +15,22 @@
         pkgs = import nixpkgs {
           inherit system;
         };
+        beamPackages = with pkgs.beam28Packages; [
+          elixir_1_19
+          erlang
+          (elixir-ls.override {
+            elixir = pkgs.beam28Packages.elixir_1_19;
+          })
+        ];
       in
       {
         devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            elixir_1_14
-            erlang_25
-            docker
-          ];
+          buildInputs =
+            with pkgs;
+            [
+              docker
+            ]
+            ++ beamPackages;
 
           shellHook = ''
             export MIX_HOME=$PWD/.nix-mix

@@ -336,13 +336,21 @@ if Code.ensure_loaded?(Phoenix.Component) do
 
       relation_hidden_fields =
         Enum.flat_map(cleaned_fields, fn key ->
-          case struct.__struct__.__schema__(:association, key) do
-            nil -> []
-            association -> association_hidden_fields(association, key, definition_spec)
-          end
+          association_hidden_fields(struct.__struct__, key, definition_spec)
         end)
 
       cleaned_fields -- relation_hidden_fields
+    end
+
+    defp association_hidden_fields(module, key, definition_spec) when is_atom(module) do
+      if function_exported?(module, :__schema__, 2) do
+        case module.__schema__(:association, key) do
+          nil -> []
+          association -> association_hidden_fields(association, key, definition_spec)
+        end
+      else
+        []
+      end
     end
 
     defp association_hidden_fields(association, key, {definition, assigns}) do

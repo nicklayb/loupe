@@ -5,10 +5,10 @@ defmodule Loupe.PhoenixLiveView.LiveComponentTest do
   alias Loupe.PhoenixLiveView.LiveComponent, as: LoupeLiveComponent
   alias Loupe.Test.Ecto.Comment
   alias Loupe.Test.Ecto.ExternalKey
+  alias Loupe.Test.Ecto.Repo
   alias Loupe.Test.Ecto.Role
   alias Loupe.Test.Ecto.User
   alias Loupe.Test.Ecto.UserExternalKey
-  alias Loupe.Test.Ecto.Repo
   @implementation Loupe.Test.Ecto.Definition
 
   setup_all [
@@ -64,19 +64,19 @@ defmodule Loupe.PhoenixLiveView.LiveComponentTest do
 
       view = render_live_component(results, %{definition_assigns: %{role: "user"}})
 
-      assert view |> has_element?(".loupe-struct-field-value", @email)
-      assert view |> has_element?(".loupe-struct-field-name", "email")
+      assert has_element?(view, ".loupe-struct-field-value", @email)
+      assert has_element?(view, ".loupe-struct-field-name", "email")
 
-      assert view |> has_element?(".loupe-association-not-loaded", "[ Post ]")
+      assert has_element?(view, ".loupe-association-not-loaded", "[ Post ]")
 
       [%{posts: [%{title: title}]}] = results = Repo.preload(results, [:posts])
 
-      view = render_live_component(results, %{definition_assigns: %{role: "user"}})
+      preloaded_view = render_live_component(results, %{definition_assigns: %{role: "user"}})
 
-      assert view |> has_element?(".loupe-struct-field-value", title)
-      assert view |> has_element?(".loupe-struct-field-name", "title")
+      assert has_element?(preloaded_view, ".loupe-struct-field-value", title)
+      assert has_element?(preloaded_view, ".loupe-struct-field-name", "title")
 
-      refute view |> has_element?(".loupe-association-not-loaded", "[ Post ]")
+      refute has_element?(preloaded_view, ".loupe-association-not-loaded", "[ Post ]")
     end
 
     test "doesn't show field with unavailable schema" do
@@ -89,8 +89,8 @@ defmodule Loupe.PhoenixLiveView.LiveComponentTest do
       assert schemas = @implementation.schemas(assigns)
       refute ExternalKey in Map.values(schemas)
       assert :all = @implementation.schema_fields(Comment, assigns)
-      refute view |> has_element?(".loupe-struct-field-name", "external_key")
-      refute view |> has_element?(".loupe-struct-field-name", "external_key_id")
+      refute has_element?(view, ".loupe-struct-field-name", "external_key")
+      refute has_element?(view, ".loupe-struct-field-name", "external_key_id")
     end
 
     test "doesn't show hidden fields" do
@@ -104,14 +104,14 @@ defmodule Loupe.PhoenixLiveView.LiveComponentTest do
       assert {:only, fields} = @implementation.schema_fields(User, assigns)
       refute :role in fields
 
-      refute view |> has_element?(".loupe-struct-field-name", "role")
-      assigns = %{role: "admin"}
+      refute has_element?(view, ".loupe-struct-field-name", "role")
+      admin_assigns = %{role: "admin"}
 
-      view = render_live_component(results, %{definition_assigns: assigns})
+      admin_view = render_live_component(results, %{definition_assigns: admin_assigns})
 
-      assert :all = @implementation.schema_fields(User, assigns)
+      assert :all = @implementation.schema_fields(User, admin_assigns)
 
-      assert view |> has_element?(".loupe-struct-field-name", "role")
+      assert has_element?(admin_view, ".loupe-struct-field-name", "role")
     end
   end
 

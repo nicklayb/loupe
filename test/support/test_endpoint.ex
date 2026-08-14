@@ -1,11 +1,14 @@
 defmodule Loupe.LiveIndex do
+  @moduledoc "Fake wrapper module to test the component"
   use Phoenix.LiveComponent
 
   def render(assigns) do
-    assigns = assign_new(assigns, :definition_assigns, fn -> %{} end)
-    assigns = assign_new(assigns, :renderer, fn -> nil end)
-    assigns = assign_new(assigns, :key, fn -> [] end)
-    assigns = assign_new(assigns, :inspect_modules, fn -> [] end)
+    assigns =
+      assigns
+      |> assign_new(:definition_assigns, fn -> %{} end)
+      |> assign_new(:renderer, fn -> nil end)
+      |> assign_new(:key, fn -> [] end)
+      |> assign_new(:inspect_modules, fn -> [] end)
 
     ~H"""
     <div>
@@ -22,6 +25,7 @@ defmodule Loupe.LiveIndex do
 end
 
 defmodule Loupe.TestEndpoint do
+  @moduledoc "Fake endpoint to run live components with"
   use Phoenix.Endpoint, otp_app: :loupe
 
   @session_options [

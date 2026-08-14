@@ -1,9 +1,9 @@
+alias Loupe.Test.Ecto.Comment
+alias Loupe.Test.Ecto.ExternalKey
 alias Loupe.Test.Ecto.Post
 alias Loupe.Test.Ecto.Repo
 alias Loupe.Test.Ecto.Role
 alias Loupe.Test.Ecto.User
-alias Loupe.Test.Ecto.Comment
-alias Loupe.Test.Ecto.ExternalKey
 alias Loupe.Test.Ecto.UserExternalKey
 
 Application.ensure_all_started(:ecto)

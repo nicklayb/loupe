@@ -91,6 +91,15 @@ defmodule Loupe.PhoenixLiveView.LiveComponentTest do
       assert :all = @implementation.schema_fields(Comment, assigns)
       refute has_element?(view, ".loupe-struct-field-name", "external_key")
       refute has_element?(view, ".loupe-struct-field-name", "external_key_id")
+
+      admin_assigns = %{role: "admin"}
+      admin_view = render_live_component(results, %{definition_assigns: admin_assigns})
+
+      assert schemas = @implementation.schemas(admin_assigns)
+      assert ExternalKey in Map.values(schemas)
+      assert :all = @implementation.schema_fields(Comment, admin_assigns)
+      assert has_element?(admin_view, ".loupe-struct-field-name", "external_key")
+      assert has_element?(admin_view, ".loupe-struct-field-name", "external_key_id")
     end
 
     test "doesn't show hidden fields" do

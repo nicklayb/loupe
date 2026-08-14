@@ -31,6 +31,8 @@ defmodule Loupe.Test.Ecto do
       field(:post_id, :integer)
 
       belongs_to(:author, Module.concat(["Loupe", "Test", "Ecto", "User"]))
+
+      belongs_to(:external_key, Module.concat(["Loupe", "Test", "Ecto", "ExternalKey"]))
     end
   end
 
@@ -134,7 +136,7 @@ defmodule Loupe.Test.Ecto do
     def scope_schema(schema, _), do: schema
 
     @impl Loupe.Ecto.Definition
-    def cast_sigil('m', money_string, _) do
+    def cast_sigil(~c"m", money_string, _) do
       money_string
       |> String.to_float()
       |> then(&(&1 * 100))

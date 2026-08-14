@@ -5,9 +5,6 @@ defmodule Loupe.LiveViewTestCase do
 
   use ExUnit.CaseTemplate
 
-  alias Ecto.Adapters.SQL.Sandbox
-  alias Loupe.Test.Ecto.Repo
-
   using do
     quote do
       import Loupe.TestCase
@@ -15,6 +12,8 @@ defmodule Loupe.LiveViewTestCase do
       import Phoenix.Component
       import Phoenix.LiveViewTest
       import Loupe.Test.Ecto
+
+      @endpoint Loupe.TestEndpoint
 
       require Assertions
     end

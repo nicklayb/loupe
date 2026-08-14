@@ -27,13 +27,15 @@ defmodule Loupe.Test.Ecto.Migrations.CreateTables do
       add(:price, :money_with_currency)
     end
 
-    create(table("comments")) do
-      add(:text, :string)
-      add(:post_id, references(:posts))
-    end
-
     create(table("external_keys")) do
       add(:external_id, :string)
+    end
+
+    create(table("comments")) do
+      add(:text, :string)
+      add(:post_id, references("posts"))
+      add(:author_id, references("users"))
+      add(:external_key_id, references("external_keys"))
     end
 
     create(table("user_external_keys")) do

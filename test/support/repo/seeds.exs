@@ -22,7 +22,7 @@ admin_user =
       %Post{
         title: "My post",
         comments: [
-          %Comment{text: "That's something"}
+          %Comment{text: "That's something", external_key: %ExternalKey{external_id: "comment1"}}
         ],
         price: Money.new(1000, :CAD)
       }

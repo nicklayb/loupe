@@ -269,6 +269,10 @@ if Code.ensure_loaded?(Phoenix.Component) do
       related
     end
 
+    defp related_key(%{owner_key: owner_key}) do
+      List.wrap(owner_key)
+    end
+
     defp top_level_type(%struct{}), do: top_level_type(struct)
 
     defp top_level_type(struct) do
@@ -291,9 +295,11 @@ if Code.ensure_loaded?(Phoenix.Component) do
     defp map_fields(%module{} = struct, definition_spec) do
       ecto? = function_exported?(module, :__schema__, 2)
 
+      sanitize_keys = sanitize_keys(struct, definition_spec)
+
       struct
       |> Map.keys()
-      |> Enum.reject(&skip_key?(module, &1, definition_spec))
+      |> Enum.filter(&(&1 in sanitize_keys))
       |> Enum.sort_by(&to_string/1)
       |> Enum.map(fn key ->
         value = Map.fetch!(struct, key)
@@ -318,6 +324,39 @@ if Code.ensure_loaded?(Phoenix.Component) do
       end
     end
 
+    defp sanitize_keys(struct, {definition, assigns} = definition_spec) do
+      base_keys =
+        case definition.schema_fields(struct.__struct__, assigns) do
+          :all -> Map.keys(struct)
+          {:only, keys} -> keys
+        end
+
+      cleaned_fields =
+        Enum.reject(base_keys, &skip_key?(struct.__struct__, &1, definition_spec))
+
+      relation_hidden_fields =
+        Enum.flat_map(cleaned_fields, fn key ->
+          case struct.__struct__.__schema__(:association, key) do
+            nil -> []
+            association -> association_hidden_fields(association, key, definition_spec)
+          end
+        end)
+
+      cleaned_fields -- relation_hidden_fields
+    end
+
+    defp association_hidden_fields(association, key, {definition, assigns}) do
+      schemas = definition.schemas(assigns)
+      related_type = related_type(association)
+
+      if related_type in Map.values(schemas) do
+        []
+      else
+        related_key = related_key(association)
+        [key | related_key]
+      end
+    end
+
     defp skip_key?(module, key, definition_spec) do
       if internal_key?(key) do
         true
@@ -329,7 +368,7 @@ if Code.ensure_loaded?(Phoenix.Component) do
     defp invalid_in_definition?(module, key, {definition, assigns}) do
       case definition.schema_fields(module, assigns) do
         :all -> false
-        keys -> key not in keys
+        {:only, keys} -> key not in keys
       end
     end
 

@@ -1,14 +1,10 @@
 defmodule Loupe.PhoenixLiveView.LiveComponentTest do
   use Loupe.LiveViewTestCase, async: false
-
   import LiveIsolatedComponent
 
-  alias Loupe.Ecto, as: LoupeEcto
-  alias Loupe.Ecto.Context
-  alias Loupe.Ecto.Errors.MissingSchemaError
   alias Loupe.PhoenixLiveView.LiveComponent, as: LoupeLiveComponent
+  alias Loupe.Test.Ecto.Comment
   alias Loupe.Test.Ecto.ExternalKey
-  alias Loupe.Test.Ecto.Post
   alias Loupe.Test.Ecto.Role
   alias Loupe.Test.Ecto.User
   alias Loupe.Test.Ecto.UserExternalKey
@@ -62,14 +58,72 @@ defmodule Loupe.PhoenixLiveView.LiveComponentTest do
   end
 
   describe "render/1" do
-    test "renders record list" do
-      assert [%{email: @email}] = results = run_query(~s|get User where email = "#{@email}"|)
+    test "renders associations only if preloaded" do
+      assert [%{email: @email, posts: %Ecto.Association.NotLoaded{}}] =
+               results = run_query(~s|get User where email = "#{@email}"|)
 
-      {:ok, view, _html} =
-        live_isolated_component(LoupeLiveComponent, %{
-          result: results,
-          definition: @implementation
-        })
+      view = render_live_component(results, %{definition_assigns: %{role: "user"}})
+
+      assert view |> has_element?(".loupe-struct-field-value", @email)
+      assert view |> has_element?(".loupe-struct-field-name", "email")
+
+      assert view |> has_element?(".loupe-association-not-loaded", "[ Post ]")
+
+      [%{posts: [%{title: title}]}] = results = Repo.preload(results, [:posts])
+
+      view = render_live_component(results, %{definition_assigns: %{role: "user"}})
+
+      assert view |> has_element?(".loupe-struct-field-value", title)
+      assert view |> has_element?(".loupe-struct-field-name", "title")
+
+      refute view |> has_element?(".loupe-association-not-loaded", "[ Post ]")
     end
+
+    test "doesn't show field with unavailable schema" do
+      assert [%{external_key: %Ecto.Association.NotLoaded{}}] =
+               results = run_query(~s|get all Comment where text = "That's something"|)
+
+      assigns = %{role: "user"}
+      view = render_live_component(results, %{definition_assigns: assigns})
+
+      assert schemas = @implementation.schemas(assigns)
+      refute ExternalKey in Map.values(schemas)
+      assert :all = @implementation.schema_fields(Comment, assigns)
+      refute view |> has_element?(".loupe-struct-field-name", "external_key")
+      refute view |> has_element?(".loupe-struct-field-name", "external_key_id")
+    end
+
+    test "doesn't show hidden fields" do
+      assert [%{email: @email, posts: %Ecto.Association.NotLoaded{}}] =
+               results = run_query(~s|get User where email = "#{@email}"|)
+
+      assigns = %{role: "user"}
+
+      view = render_live_component(results, %{definition_assigns: assigns})
+
+      assert {:only, fields} = @implementation.schema_fields(User, assigns)
+      refute :role in fields
+
+      refute view |> has_element?(".loupe-struct-field-name", "role")
+      assigns = %{role: "admin"}
+
+      view = render_live_component(results, %{definition_assigns: assigns})
+
+      assert :all = @implementation.schema_fields(User, assigns)
+
+      assert view |> has_element?(".loupe-struct-field-name", "role")
+    end
+  end
+
+  defp render_live_component(result, assigns) do
+    {:ok, view, _html} =
+      %{
+        result: result,
+        definition: @implementation
+      }
+      |> Map.merge(assigns)
+      |> then(&live_isolated_component(Loupe.LiveIndex, &1))
+
+    view
   end
 end

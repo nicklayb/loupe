@@ -3,126 +3,128 @@ defmodule LoupeLexerTest do
 
   describe "string/1" do
     test "parses comma" do
-      assert {:ok, [{:comma, 1, :","}], 1} = :loupe_lexer.string(',')
+      assert {:ok, [{:comma, 1, :","}], 1} = :loupe_lexer.string(~c|,|)
     end
 
     test "parses all" do
-      assert {:ok, [{:all, 1, :all}], 1} = :loupe_lexer.string('all')
+      assert {:ok, [{:all, 1, :all}], 1} = :loupe_lexer.string(~c|all|)
     end
 
     test "parses where" do
-      assert {:ok, [{:where, 1, :where}], 1} = :loupe_lexer.string('where')
+      assert {:ok, [{:where, 1, :where}], 1} = :loupe_lexer.string(~c|where|)
     end
 
     test "parses empty" do
-      assert {:ok, [{:empty, 1, :":empty"}], 1} = :loupe_lexer.string(':empty')
+      assert {:ok, [{:empty, 1, :":empty"}], 1} = :loupe_lexer.string(~c|:empty|)
     end
 
     test "parses integer" do
-      assert {:ok, [{:integer, 1, 0}], 1} = :loupe_lexer.string('0')
-      assert {:ok, [{:integer, 1, -1}], 1} = :loupe_lexer.string('-1')
-      assert {:ok, [{:integer, 1, -10}], 1} = :loupe_lexer.string('-10')
-      assert {:ok, [{:integer, 1, 1}], 1} = :loupe_lexer.string('1')
-      assert {:ok, [{:integer, 1, 10}], 1} = :loupe_lexer.string('10')
+      assert {:ok, [{:integer, 1, 0}], 1} = :loupe_lexer.string(~c|0|)
+      assert {:ok, [{:integer, 1, -1}], 1} = :loupe_lexer.string(~c|-1|)
+      assert {:ok, [{:integer, 1, -10}], 1} = :loupe_lexer.string(~c|-10|)
+      assert {:ok, [{:integer, 1, 1}], 1} = :loupe_lexer.string(~c|1|)
+      assert {:ok, [{:integer, 1, 10}], 1} = :loupe_lexer.string(~c|10|)
     end
 
     test "parses quantified integer" do
-      assert {:ok, [{:integer, 1, 1_000}], 1} = :loupe_lexer.string('1K')
-      assert {:ok, [{:integer, 1, 10_000}], 1} = :loupe_lexer.string('10K')
-      assert {:ok, [{:integer, 1, 1_000}], 1} = :loupe_lexer.string('1k')
-      assert {:ok, [{:integer, 1, 10_000}], 1} = :loupe_lexer.string('10k')
+      assert {:ok, [{:integer, 1, 1_000}], 1} = :loupe_lexer.string(~c|1K|)
+      assert {:ok, [{:integer, 1, 10_000}], 1} = :loupe_lexer.string(~c|10K|)
+      assert {:ok, [{:integer, 1, 1_000}], 1} = :loupe_lexer.string(~c|1k|)
+      assert {:ok, [{:integer, 1, 10_000}], 1} = :loupe_lexer.string(~c|10k|)
 
-      assert {:ok, [{:integer, 1, 1_000_000}], 1} = :loupe_lexer.string('1m')
-      assert {:ok, [{:integer, 1, 10_000_000}], 1} = :loupe_lexer.string('10m')
-      assert {:ok, [{:integer, 1, 1_000_000}], 1} = :loupe_lexer.string('1M')
-      assert {:ok, [{:integer, 1, 10_000_000}], 1} = :loupe_lexer.string('10M')
+      assert {:ok, [{:integer, 1, 1_000_000}], 1} = :loupe_lexer.string(~c|1m|)
+      assert {:ok, [{:integer, 1, 10_000_000}], 1} = :loupe_lexer.string(~c|10m|)
+      assert {:ok, [{:integer, 1, 1_000_000}], 1} = :loupe_lexer.string(~c|1M|)
+      assert {:ok, [{:integer, 1, 10_000_000}], 1} = :loupe_lexer.string(~c|10M|)
     end
 
     test "parses float" do
-      assert {:ok, [{:float, 1, 1.20}], 1} = :loupe_lexer.string('1.20')
-      assert {:ok, [{:float, 1, 0.10}], 1} = :loupe_lexer.string('0.10')
-      assert {:ok, [{:float, 1, 0.10}], 1} = :loupe_lexer.string('0.10')
-      assert {:ok, [{:float, 1, -1.20}], 1} = :loupe_lexer.string('-1.20')
-      assert {:ok, [{:float, 1, -19.20}], 1} = :loupe_lexer.string('-19.20')
+      assert {:ok, [{:float, 1, 1.20}], 1} = :loupe_lexer.string(~c|1.20|)
+      assert {:ok, [{:float, 1, 0.10}], 1} = :loupe_lexer.string(~c|0.10|)
+      assert {:ok, [{:float, 1, 0.10}], 1} = :loupe_lexer.string(~c|0.10|)
+      assert {:ok, [{:float, 1, -1.20}], 1} = :loupe_lexer.string(~c|-1.20|)
+      assert {:ok, [{:float, 1, -19.20}], 1} = :loupe_lexer.string(~c|-19.20|)
     end
 
     test "parses sigil" do
-      assert {:ok, [{:sigil, 1, {'m', 'my sigil'}}], 1} = :loupe_lexer.string('~m"my sigil"')
-      assert {:ok, [{:sigil, 1, {'c', 'other'}}], 1} = :loupe_lexer.string('~c"other"')
+      assert {:ok, [{:sigil, 1, {~c"m", ~c"my sigil"}}], 1} =
+               :loupe_lexer.string(~c|~m"my sigil"|)
+
+      assert {:ok, [{:sigil, 1, {~c"c", ~c"other"}}], 1} = :loupe_lexer.string(~c|~c"other"|)
     end
 
     test "parses string" do
-      assert {:ok, [{:string, 1, 'some string with space \\\"quotes\\\" 123 and numbers'}], 1} =
-               :loupe_lexer.string('"some string with space \\\"quotes\\\" 123 and numbers"')
+      assert {:ok, [{:string, 1, ~c|some string with space \\\"quotes\\\" 123 and numbers|}], 1} =
+               :loupe_lexer.string(~c|"some string with space \\\"quotes\\\" 123 and numbers"|)
     end
 
     test "parses boolean operator" do
-      assert {:ok, [{:boolean_operator, 1, :or}], 1} = :loupe_lexer.string('or')
-      assert {:ok, [{:boolean_operator, 1, :and}], 1} = :loupe_lexer.string('and')
+      assert {:ok, [{:boolean_operator, 1, :or}], 1} = :loupe_lexer.string(~c|or|)
+      assert {:ok, [{:boolean_operator, 1, :and}], 1} = :loupe_lexer.string(~c|and|)
     end
 
     test "parses operand" do
-      assert {:ok, [{:operand, 1, :>}], 1} = :loupe_lexer.string('>')
-      assert {:ok, [{:operand, 1, :>=}], 1} = :loupe_lexer.string('>=')
-      assert {:ok, [{:operand, 1, :<}], 1} = :loupe_lexer.string('<')
-      assert {:ok, [{:operand, 1, :<=}], 1} = :loupe_lexer.string('<=')
-      assert {:ok, [{:operand, 1, :=}], 1} = :loupe_lexer.string('=')
-      assert {:ok, [{:operand, 1, :!=}], 1} = :loupe_lexer.string('!=')
+      assert {:ok, [{:operand, 1, :>}], 1} = :loupe_lexer.string(~c|>|)
+      assert {:ok, [{:operand, 1, :>=}], 1} = :loupe_lexer.string(~c|>=|)
+      assert {:ok, [{:operand, 1, :<}], 1} = :loupe_lexer.string(~c|<|)
+      assert {:ok, [{:operand, 1, :<=}], 1} = :loupe_lexer.string(~c|<=|)
+      assert {:ok, [{:operand, 1, :=}], 1} = :loupe_lexer.string(~c|=|)
+      assert {:ok, [{:operand, 1, :!=}], 1} = :loupe_lexer.string(~c|!=|)
     end
 
     test "parses list operand" do
-      assert {:ok, [{:list_operand, 1, :in}], 1} = :loupe_lexer.string('in')
+      assert {:ok, [{:list_operand, 1, :in}], 1} = :loupe_lexer.string(~c|in|)
     end
 
     test "parses like" do
-      assert {:ok, [{:like, 1, :like}], 1} = :loupe_lexer.string('like')
+      assert {:ok, [{:like, 1, :like}], 1} = :loupe_lexer.string(~c|like|)
     end
 
     test "parses negate" do
-      assert {:ok, [{:negate, 1, :not}], 1} = :loupe_lexer.string('not')
+      assert {:ok, [{:negate, 1, :not}], 1} = :loupe_lexer.string(~c|not|)
     end
 
     test "parses dot" do
-      assert {:ok, [{:dot, 1, :.}], 1} = :loupe_lexer.string('.')
+      assert {:ok, [{:dot, 1, :.}], 1} = :loupe_lexer.string(~c|.|)
     end
 
     test "parses identifier" do
-      assert {:ok, [{:identifier, 1, 'something'}], 1} = :loupe_lexer.string('something')
+      assert {:ok, [{:identifier, 1, ~c"something"}], 1} = :loupe_lexer.string(~c|something|)
 
-      assert {:ok, [{:identifier, 1, 'with_underscore'}], 1} =
-               :loupe_lexer.string('with_underscore')
+      assert {:ok, [{:identifier, 1, ~c"with_underscore"}], 1} =
+               :loupe_lexer.string(~c|with_underscore|)
 
-      assert {:ok, [{:identifier, 1, 'with_numbers_123'}], 1} =
-               :loupe_lexer.string('with_numbers_123')
+      assert {:ok, [{:identifier, 1, ~c"with_numbers_123"}], 1} =
+               :loupe_lexer.string(~c|with_numbers_123|)
     end
 
     test "parse groupers" do
-      assert {:ok, [{:open_paren, 1, :"("}], 1} = :loupe_lexer.string('(')
-      assert {:ok, [{:close_paren, 1, :")"}], 1} = :loupe_lexer.string(')')
-      assert {:ok, [{:open_bracket, 1, :"["}], 1} = :loupe_lexer.string('[')
-      assert {:ok, [{:close_bracket, 1, :"]"}], 1} = :loupe_lexer.string(']')
+      assert {:ok, [{:open_paren, 1, :"("}], 1} = :loupe_lexer.string(~c|(|)
+      assert {:ok, [{:close_paren, 1, :")"}], 1} = :loupe_lexer.string(~c|)|)
+      assert {:ok, [{:open_bracket, 1, :"["}], 1} = :loupe_lexer.string(~c|[|)
+      assert {:ok, [{:close_bracket, 1, :"]"}], 1} = :loupe_lexer.string(~c|]|)
     end
 
     test "parse path" do
       assert {:ok,
               [
                 {:open_bracket, 1, :"["},
-                {:string, 1, 'first'},
+                {:string, 1, ~c"first"},
                 {:comma, 1, :","},
-                {:identifier, 1, 'second'},
+                {:identifier, 1, ~c"second"},
                 {:comma, 1, :","},
-                {:string, 1, 'third'},
+                {:string, 1, ~c"third"},
                 {:close_bracket, 1, :"]"}
-              ], 1} = :loupe_lexer.string('["first", second, "third"]')
+              ], 1} = :loupe_lexer.string(~c|["first", second, "third"]|)
     end
 
     test "parse variant" do
       assert {:ok,
               [
-                {:identifier, 1, 'field'},
+                {:identifier, 1, ~c"field"},
                 {:colon, 1, :":"},
-                {:identifier, 1, 'variant'}
-              ], _} = :loupe_lexer.string('field:variant')
+                {:identifier, 1, ~c"variant"}
+              ], _} = :loupe_lexer.string(~c|field:variant|)
     end
 
     test "parse object" do
@@ -130,31 +132,31 @@ defmodule LoupeLexerTest do
               [
                 {:open_curly, 1, :"{"},
                 #
-                {:identifier, 1, 'key'},
+                {:identifier, 1, ~c"key"},
                 {:colon, 1, :":"},
-                {:string, 1, 'value'},
+                {:string, 1, ~c"value"},
                 {:comma, 1, :","},
                 #
-                {:identifier, 1, 'int'},
+                {:identifier, 1, ~c"int"},
                 {:colon, 1, :":"},
                 {:integer, 1, 1},
                 {:comma, 1, :","},
                 #
-                {:identifier, 1, 'float'},
+                {:identifier, 1, ~c"float"},
                 {:colon, 1, :":"},
                 {:float, 1, 2.3},
                 {:comma, 1, :","},
                 #
-                {:identifier, 1, 'object'},
+                {:identifier, 1, ~c"object"},
                 {:colon, 1, :":"},
                 {:open_curly, 1, :"{"},
                 #
-                {:identifier, 1, 'sigil'},
+                {:identifier, 1, ~c"sigil"},
                 {:colon, 1, :":"},
-                {:sigil, 1, {'m', 'sigil'}},
+                {:sigil, 1, {~c"m", ~c"sigil"}},
                 {:comma, 1, :","},
                 #
-                {:identifier, 1, 'list'},
+                {:identifier, 1, ~c"list"},
                 {:colon, 1, :":"},
                 {:open_bracket, 1, :"["},
                 {:integer, 1, 1},
@@ -165,10 +167,9 @@ defmodule LoupeLexerTest do
                 {:close_bracket, 1, :"]"},
                 {:close_curly, 1, :"}"},
                 {:close_curly, 1, :"}"}
-              ],
-              _} =
+              ], _} =
                :loupe_lexer.string(
-                 '{key: "value", int: 1, float: 2.3, object: {sigil: ~m"sigil", list: [1, 2, 3]}}'
+                 ~c|{key: "value", int: 1, float: 2.3, object: {sigil: ~m"sigil", list: [1, 2, 3]}}|
                )
     end
   end

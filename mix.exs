@@ -2,7 +2,7 @@ defmodule Loupe.MixProject do
   use Mix.Project
 
   @github "https://github.com/nicklayb/loupe"
-  @version "0.11.2"
+  @version "0.12.0"
 
   def project do
     [
@@ -11,6 +11,7 @@ defmodule Loupe.MixProject do
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      compilers: [:yecc, :leex] ++ Mix.compilers(),
       deps: deps(),
       docs: docs(),
       aliases: aliases(),
@@ -29,6 +30,17 @@ defmodule Loupe.MixProject do
       description: "User friendly customizable query syntax",
       source_url: @github,
       package: package()
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -103,12 +115,14 @@ defmodule Loupe.MixProject do
       {:phoenix_live_view, "~> 0.18", optional: true},
       {:ecto, "~> 3.11", optional: true},
       {:ecto_sql, "~> 3.11", optional: true},
-      {:credo, "~> 1.7.11", only: [:dev, :test]},
-      {:excoveralls, "~> 0.16", only: :test},
+      {:credo, "~> 1.7.19", only: [:dev, :test]},
+      {:excoveralls, "~> 0.18.5", only: :test},
+      {:floki, ">= 0.30.0", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:postgrex, ">= 0.0.0", only: [:dev, :test]},
-      {:money, "~> 1.10", only: [:dev, :test]}
+      {:money, "~> 1.10", only: [:dev, :test]},
+      {:live_isolated_component, "~> 0.7.0", only: [:dev, :test]}
     ]
   end
 

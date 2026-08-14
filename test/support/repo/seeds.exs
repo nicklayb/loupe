@@ -1,9 +1,9 @@
+alias Loupe.Test.Ecto.Comment
+alias Loupe.Test.Ecto.ExternalKey
 alias Loupe.Test.Ecto.Post
 alias Loupe.Test.Ecto.Repo
 alias Loupe.Test.Ecto.Role
 alias Loupe.Test.Ecto.User
-alias Loupe.Test.Ecto.Comment
-alias Loupe.Test.Ecto.ExternalKey
 alias Loupe.Test.Ecto.UserExternalKey
 
 Application.ensure_all_started(:ecto)
@@ -22,7 +22,7 @@ admin_user =
       %Post{
         title: "My post",
         comments: [
-          %Comment{text: "That's something"}
+          %Comment{text: "That's something", external_key: %ExternalKey{external_id: "comment1"}}
         ],
         price: Money.new(1000, :CAD)
       }

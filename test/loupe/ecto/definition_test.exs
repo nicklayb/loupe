@@ -60,8 +60,8 @@ defmodule Loupe.Ecto.DefinitionTest do
                  assigns: assigns
                )
 
-      assert %{author: "User"} == associations
-      Assertions.assert_lists_equal(fields, [:id, :text, :post_id, :author_id])
+      assert %{author: "User", external_key: "ExternalKey"} == associations
+      Assertions.assert_lists_equal(fields, [:id, :text, :post_id, :author_id, :external_key_id])
     end
 
     test "returns root fields for empty path" do

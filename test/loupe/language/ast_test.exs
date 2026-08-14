@@ -10,7 +10,7 @@ defmodule Loupe.Language.AstTest do
                schema: "User",
                quantifier: :all,
                predicates: {:>, {:binding, ["age"]}, {:int, 10}}
-             } = Ast.new('get', 'User', :all, {:>, {:binding, ['age']}, {:int, 10}})
+             } = Ast.new(~c"get", ~c"User", :all, {:>, {:binding, [~c"age"]}, {:int, 10}})
     end
 
     test "creates any other ast structure and converts charlist to string" do
@@ -19,7 +19,7 @@ defmodule Loupe.Language.AstTest do
                schema: "User",
                quantifier: :all,
                predicates: {:>, {:binding, ["age"]}, {:int, 10}}
-             } = Ast.new('ecto', 'User', :all, {:>, {:binding, ['age']}, {:int, 10}})
+             } = Ast.new(~c"ecto", ~c"User", :all, {:>, {:binding, [~c"age"]}, {:int, 10}})
     end
   end
 
@@ -38,27 +38,32 @@ defmodule Loupe.Language.AstTest do
 
   describe "unwrap_literal/2" do
     test "unwraps literals" do
-      assert {"string", %MapSet{}} = Ast.unwrap_literal({:string, 'string'}, MapSet.new())
+      assert {"string", %MapSet{}} = Ast.unwrap_literal({:string, ~c"string"}, MapSet.new())
       assert {12, %MapSet{}} = Ast.unwrap_literal({:int, 12}, MapSet.new())
       assert {12.5, %MapSet{}} = Ast.unwrap_literal({:float, 12.5}, MapSet.new())
 
-      assert {{:sigil, {'m', "sigil"}}, %MapSet{}} =
-               Ast.unwrap_literal({:sigil, {'m', "sigil"}}, MapSet.new())
+      assert {{:sigil, {~c"m", "sigil"}}, %MapSet{}} =
+               Ast.unwrap_literal({:sigil, {~c"m", ~c"sigil"}}, MapSet.new())
 
-      assert {["string", 12, 12.5, {:sigil, {'m', "sigil"}}], %MapSet{}} =
+      assert {["string", 12, 12.5, {:sigil, {~c"m", "sigil"}}], %MapSet{}} =
                Ast.unwrap_literal(
                  {:list,
-                  [{:string, 'string'}, {:int, 12}, {:float, 12.5}, {:sigil, {'m', 'sigil'}}]},
+                  [
+                    {:string, ~c"string"},
+                    {:int, 12},
+                    {:float, 12.5},
+                    {:sigil, {~c"m", ~c"sigil"}}
+                  ]},
                  MapSet.new()
                )
 
       assert {[{:identifier, "string"}], external_identifiers} =
-               Ast.unwrap_literal({:list, [{:identifier, 'string'}]}, MapSet.new())
+               Ast.unwrap_literal({:list, [{:identifier, ~c"string"}]}, MapSet.new())
 
       assert MapSet.equal?(external_identifiers, MapSet.new(["string"]))
 
       assert {{:identifier, "string"}, external_identifiers} =
-               Ast.unwrap_literal({:identifier, 'string'}, MapSet.new())
+               Ast.unwrap_literal({:identifier, ~c"string"}, MapSet.new())
 
       assert MapSet.equal?(external_identifiers, MapSet.new(["string"]))
     end

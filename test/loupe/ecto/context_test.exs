@@ -167,15 +167,15 @@ defmodule Loupe.Ecto.ContextTest do
     setup [:create_context, :with_root_schema]
 
     test "casts sigil using the implementation", %{context: context} do
-      assert 40_000 = Context.cast_sigil(context, {'m', "400.00"})
-      assert "other" = Context.cast_sigil(context, {'o', "other"})
+      assert 40_000 = Context.cast_sigil(context, {~c"m", "400.00"})
+      assert "other" = Context.cast_sigil(context, {~c"o", "other"})
     end
   end
 
   describe "put_parameters/2" do
     setup [:create_context, :with_root_schema]
 
-    test "puts parameters evaluating variable", %{context: context} do
+    test "puts parameters evaluating variable", %{context: %Context{} = context} do
       assert %Context{
                parameters: %{
                  "string" => "value",
@@ -199,7 +199,7 @@ defmodule Loupe.Ecto.ContextTest do
                    "object" => %{"int" => 12, "another" => {:identifier, "external_int"}},
                    "list" => [12.2, 5.5, {:identifier, "external_float"}],
                    "external" => {:identifier, "external_string"},
-                   "sigil" => {:sigil, {'m', "15,20"}}
+                   "sigil" => {:sigil, {~c"m", "15,20"}}
                  }
                )
     end

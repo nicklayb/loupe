@@ -247,7 +247,7 @@ defmodule Loupe.LanguageTest do
 
     @failing_case ~s|get User where name = "d|
     test "intercepts raise errors" do
-      assert {:error, %Loupe.Errors.LexerError{line: 1, message: {:illegal, '"d'}}} =
+      assert {:error, %Loupe.Errors.LexerError{line: 1, message: {:illegal, ~c|"d|}}} =
                Language.compile(@failing_case)
     end
   end

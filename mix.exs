@@ -2,7 +2,7 @@ defmodule Loupe.MixProject do
   use Mix.Project
 
   @github "https://github.com/nicklayb/loupe"
-  @version "0.12.2"
+  @version "VERSION" |> File.read!() |> String.trim()
 
   def project do
     [
@@ -47,7 +47,7 @@ defmodule Loupe.MixProject do
   defp package do
     [
       name: "loupe",
-      files: ~w(lib src mix.exs README* LICENSE* CONTRIBUTING*),
+      files: ~w(lib src mix.exs VERSION README* LICENSE* CONTRIBUTING*),
       licenses: ["MIT"],
       links: %{
         "GitHub" => @github

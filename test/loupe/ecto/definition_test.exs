@@ -103,4 +103,63 @@ defmodule Loupe.Ecto.DefinitionTest do
       Assertions.assert_lists_equal(fields, [])
     end
   end
+
+  describe "definition_manifest/2" do
+    test "gets the definition manifests of all available schemas and fields" do
+      assert %{
+               "Comment" => %{
+                 associations: %{
+                   author: "User",
+                   external_key: "ExternalKey"
+                 },
+                 fields: [:id, :text, :post_id, :author_id, :external_key_id]
+               },
+               "ExternalKey" => %{
+                 associations: %{},
+                 fields: [:id, :external_id]
+               },
+               "Post" => %{
+                 associations: %{comments: "Comment", moderator: "User"},
+                 fields: [:id, :title, :body, :user_id, :score, :price, :moderator_id]
+               },
+               "Role" => %{
+                 associations: %{},
+                 fields: [:id, :slug, :permissions]
+               },
+               "User" => %{
+                 associations: %{
+                   external_keys: "ExternalKey",
+                   posts: "Post",
+                   role: "Role",
+                   user_external_keys: "UserExternalKey"
+                 },
+                 fields: [:id, :name, :email, :age, :active, :bank_account, :role_id]
+               },
+               "UserExternalKey" => %{
+                 associations: %{external_key: "ExternalKey", user: "User"},
+                 fields: [:id, :external_key_id, :user_id]
+               }
+             } == Definition.definition_manifest(@implementation, %{role: "admin"})
+    end
+
+    test "gets the definition manifests of available schemas and fields scoped by assigns" do
+      assert %{
+               "Comment" => %{
+                 associations: %{author: "User"},
+                 fields: [
+                   :id,
+                   :text,
+                   :post_id,
+                   :author_id,
+                   :external_key_id
+                 ]
+               },
+               "Post" => %{
+                 associations: %{moderator: "User"},
+                 fields: [:title, :body]
+               },
+               "User" => %{associations: %{posts: "Post"}, fields: [:email]}
+             } == Definition.definition_manifest(@implementation, %{role: "basic user"})
+    end
+  end
 end

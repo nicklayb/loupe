@@ -185,5 +185,13 @@ if Code.ensure_loaded?(Ecto) do
     defp filter_visible(all, {:only, subset}) do
       Enum.filter(all, &(&1 in subset))
     end
+
+    def definition_manifest(definition, assigns \\ %{}) do
+      assigns
+      |> definition.schemas()
+      |> Enum.reduce(%{}, fn {schema_key, schema_module}, acc ->
+        Map.put(acc, schema_key, get_fields(definition, schema_module, assigns: assigns))
+      end)
+    end
   end
 end

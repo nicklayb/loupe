@@ -54,6 +54,8 @@ if Code.ensure_loaded?(Ecto) do
 
     @type get_field_at_option :: {:assigns, Context.assigns()} | {:accumulator, %{}}
 
+    @type manifest :: %{String.t() => field_set()}
+
     @spec get_field_at(definition_module(), String.t(), [atom()] | [String.t()], [
             get_field_at_option()
           ]) :: {field_set, map()}
@@ -186,6 +188,8 @@ if Code.ensure_loaded?(Ecto) do
       Enum.filter(all, &(&1 in subset))
     end
 
+    @doc "Returns a manifest of accessible schemas and their fields for the given definition."
+    @spec definition_manifest(definition_module(), Context.assigns()) :: manifest()
     def definition_manifest(definition, assigns \\ %{}) do
       assigns
       |> definition.schemas()
